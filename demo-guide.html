@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MachinaOS Demo Guide | Activation Protocol</title>
+    <title>MachinaOS Demo Guide | Local Runtime Setup</title>
     <meta
       name="description"
-      content="Follow the MachinaOS activation sequence: initialize core, map your local workspace, and sync your operator identity."
+      content="Follow a practical MachinaOS onboarding flow: start the runtime, register a workspace, apply policy profile, and run your first inspectable plan."
     />
     <link rel="canonical" href="https://machinaos.ai/demo-guide" />
     <link rel="stylesheet" href="assets/styles.css" />
@@ -44,7 +44,7 @@
       <section class="section reveal">
         <span class="kicker">System Initialization</span>
         <h1>Activation <strong>Protocol</strong></h1>
-        <p class="lead">A guided flow for onboarding teams to a local, intent-driven operating surface.</p>
+        <p class="lead">A practical onboarding flow to move from zero setup to your first approved, traceable intent execution.</p>
       </section>
 
       <section class="section reveal">
@@ -53,7 +53,7 @@
             <div class="step-index">01</div>
             <div>
               <h3>Initialize Core Runtime</h3>
-              <p>Start the local service layer and expose the orchestration API endpoint on your machine.</p>
+              <p>Start the local orchestration runtime that handles planning, policy, and execution dispatch.</p>
               <pre class="code-block">curl -sL get.machina.os | bash</pre>
             </div>
           </article>
@@ -63,8 +63,7 @@
             <div>
               <h3>Map Workspace Context</h3>
               <p>
-                Register your repository path so MachinaOS can resolve tools, files, and process state with deterministic path
-                safety.
+                Register your repository so MachinaOS can resolve file paths, tool availability, and process context before planning.
               </p>
               <pre class="code-block">machina workspace connect --path ./project-x</pre>
             </div>
@@ -74,7 +73,7 @@
             <div class="step-index">03</div>
             <div>
               <h3>Sync Operator Identity</h3>
-              <p>Attach policy preferences for approval gates, execution limits, and logging transparency requirements.</p>
+              <p>Apply your policy profile for approval gates, execution limits, and logging requirements.</p>
               <pre class="code-block">machina profile apply --name local-safe-default</pre>
             </div>
           </article>
@@ -83,7 +82,7 @@
 
       <section class="cta reveal">
         <h3>Complete sync</h3>
-        <p class="lead">When setup is done, run your first goal with full plan preview and execution trace.</p>
+        <p class="lead">When setup is done, run your first goal and review plan preview, approvals, tool outputs, and timeline.</p>
         <pre class="code-block">machina run "Prepare my development environment for Project X"</pre>
       </section>
     </main>

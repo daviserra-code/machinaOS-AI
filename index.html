@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MachinaOS | Intent-Driven Operating Layer</title>
+    <title>MachinaOS | Local-First Intent Runtime</title>
     <meta
       name="description"
-      content="MachinaOS is an AI-native operating layer that understands goals, plans work, and executes safely on your local machine."
+      content="MachinaOS is a local-first orchestration layer that converts natural language goals into validated plans, policy checks, and real tool execution on your machine."
     />
     <link rel="canonical" href="https://machinaos.ai/" />
     <link rel="stylesheet" href="assets/styles.css" />
@@ -46,12 +46,13 @@
           <span class="kicker">Local-first orchestration</span>
           <h1>The First <strong>Intent-Driven</strong> Operating Layer</h1>
           <p class="lead">
-            MachinaOS turns natural language goals into safe execution plans. It separates planning from execution, logs every action,
-            and keeps your workflows local by default.
+            MachinaOS sits above your existing OS and acts like an intent-native shell: planner, policy engine, and executor working
+            together. You describe the outcome, MachinaOS builds a structured plan, asks approval for risky steps, runs real tools,
+            and records an inspectable timeline.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="demo-guide.html">Initialize Setup</a>
-            <a class="btn btn-ghost" href="about.html">View Mission</a>
+            <a class="btn btn-primary" href="demo-guide.html">Open Demo Guide</a>
+            <a class="btn btn-ghost" href="about.html">View Architecture</a>
           </div>
         </div>
         <div>
@@ -66,19 +67,19 @@
         <div class="card-grid">
           <article class="card col-4">
             <h3>Heuristic Intent Router</h3>
-            <p>Deterministic parsing for tool-like requests before LLM fallback, improving reliability and speed.</p>
+            <p>Fast deterministic routing for commands like file listing, git checks, and diagnostics before model fallback.</p>
           </article>
           <article class="card col-8">
             <h3>Planner and Executor Split</h3>
-            <p>Plans are validated and constrained before execution. Risky operations require explicit checks and transparent logs.</p>
+            <p>The planner proposes steps and assigned tools, then the executor runs only approved actions with policy constraints.</p>
           </article>
           <article class="card col-8">
             <h3>Delegation and Multi-Agent Runtime</h3>
-            <p>Agent-scoped tool filters, handoff protocols, consensus gates, and fallback strategies keep execution robust.</p>
+            <p>Specialized agents can handle subtasks with tool-scoped permissions, handoff rules, and explicit execution traces.</p>
           </article>
           <article class="card col-4">
             <h3>Memory Layers</h3>
-            <p>Session, episodic, semantic, and preference memory structure for context that remains useful and controllable.</p>
+            <p>Session and preference memory keep context stable across runs without hiding state from the operator.</p>
           </article>
         </div>
       </section>
@@ -88,23 +89,23 @@
         <div class="stat-row">
           <div class="stat">
             <strong>3 Stages</strong>
-            <span>Core, Shell, OS Layer</span>
+            <span>Core, Shell, OS Layer roadmap</span>
           </div>
           <div class="stat">
             <strong>Local-First</strong>
-            <span>Data and task state</span>
+            <span>Plans, logs, and task state</span>
           </div>
           <div class="stat">
             <strong>12 Max</strong>
-            <span>Validated steps per plan</span>
+            <span>Validated steps per execution plan</span>
           </div>
         </div>
       </section>
 
       <section class="cta reveal">
         <h3>Ready to evolve your workflow?</h3>
-        <p class="lead">Deploy MachinaOS as the control surface between your intent and your machine.</p>
-        <a class="btn btn-primary" href="pricing.html">Request Early Access</a>
+        <p class="lead">Run a practical intent-to-action loop with plan previews, approvals, tool outputs, and traceable results.</p>
+        <a class="btn btn-primary" href="pricing.html">View Pricing Preview</a>
       </section>
     </main>
 
