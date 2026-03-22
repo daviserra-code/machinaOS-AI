@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>About MachinaOS | Neural-Native Computing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#9a3412",
+                        "secondary-fixed": "#cbd5e1",
+                        "on-surface": "#f1f5f9",
+                        "surface-dim": "#050b0b",
+                        "surface-bright": "#1a2424",
+                        "error": "#ef4444",
+                        "secondary": "#94a3b8",
+                        "on-error-container": "#f87171",
+                        "secondary-fixed-dim": "#94a3b8",
+                        "tertiary-fixed-dim": "#fed7aa",
+                        "tertiary-fixed": "#ffedd5",
+                        "on-secondary-container": "#f1f5f9",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#0bcbcb",
+                        "outline-variant": "rgba(255, 255, 255, 0.05)",
+                        "surface-container-lowest": "#040808",
+                        "surface-container": "#111d1d",
+                        "on-surface-variant": "#94a3b8",
+                        "on-secondary": "#081212",
+                        "on-tertiary-container": "#fdba74",
+                        "secondary-container": "#1e293b",
+                        "on-background": "#f1f5f9",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#f1f5f9",
+                        "surface": "#081212",
+                        "on-tertiary-fixed": "#7c2d12",
+                        "tertiary-container": "rgba(249, 115, 22, 0.2)",
+                        "on-primary-fixed-variant": "#004f4f",
+                        "primary-container": "rgba(13, 242, 242, 0.2)",
+                        "on-secondary-fixed": "#0f172a",
+                        "inverse-primary": "#006a6a",
+                        "error-container": "#450a0a",
+                        "primary-fixed": "#0df2f2",
+                        "on-primary-container": "#0df2f2",
+                        "on-secondary-fixed-variant": "#334155",
+                        "surface-container-highest": "#263535",
+                        "background": "#081212",
+                        "surface-container-low": "#0d1818",
+                        "primary": "#0df2f2",
+                        "inverse-on-surface": "#081212",
+                        "on-primary": "#081212",
+                        "on-primary-fixed": "#000000",
+                        "surface-variant": "rgba(255, 255, 255, 0.05)",
+                        "surface-tint": "#0df2f2",
+                        "outline": "rgba(255, 255, 255, 0.1)",
+                        "tertiary": "#f97316",
+                        "surface-container-high": "#1b2929"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 1.25rem;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .ambient-glow {
+            background: radial-gradient(circle at center, rgba(13, 242, 242, 0.08) 0%, transparent 70%);
+        }
+        body {
+            background-color: #081212;
+            color: #f1f5f9;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body selection:bg-primary/30 selection:text-primary overflow-x-hidden">
+<!-- Background Ambient Glow -->
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+<div class="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] ambient-glow"></div>
+<div class="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] ambient-glow"></div>
+</div>
+<!-- TopNavBar -->
+<nav class="docked full-width top-0 sticky z-50 bg-black/5 dark:bg-black/5 backdrop-blur-xl shadow-2xl bg-white/5">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-light tracking-[0.2em] uppercase text-white">MachinaOS</div>
+<!-- Mobile Menu Icon (Placeholder for functionality) -->
+<div class="md:hidden text-white/70">
+<span class="material-symbols-outlined">menu</span>
+</div>
+<!-- Desktop Links (Hidden on mobile per rules) -->
+<div class="hidden md:flex gap-8 items-center font-['Inter'] font-normal tracking-wide text-sm uppercase">
+<a class="text-white/70 hover:text-[#0df2f2] transition-colors duration-300" href="#">Features</a>
+<a class="text-white/70 hover:text-[#0df2f2] transition-colors duration-300" href="#">Pricing</a>
+<a class="text-[#0df2f2] font-medium border-b border-[#0df2f2] pb-1" href="#">About</a>
+<button class="bg-[#0df2f2] text-black px-6 py-2 rounded-lg font-bold Active:scale-95 duration-200">Launch Demo</button>
+</div>
+</div>
+</nav>
+<main class="relative z-10 px-6 pt-12 pb-24 max-w-screen-md mx-auto">
+<!-- Hero Section -->
+<header class="mb-24">
+<div class="flex items-center gap-2 mb-6">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] tracking-[0.2em] uppercase text-primary font-bold">Protocol Overview</span>
+</div>
+<h1 class="text-5xl md:text-6xl font-light tracking-tight text-white mb-8 leading-[1.1]">
+                The Age of <span class="text-primary">Neural-Native</span> Computing.
+            </h1>
+<p class="text-lg text-on-surface-variant leading-relaxed font-light">
+                MachinaOS isn't an upgrade. It's an evolution. We are stripping away the abstractions of legacy operating systems to build a foundation designed for the speed of thought.
+            </p>
+</header>
+<!-- The Mission Section -->
+<section class="mb-32">
+<div class="grid grid-cols-1 gap-12">
+<div class="glass-panel p-8 rounded-xl border border-white/5">
+<div class="text-[10px] tracking-[0.15em] uppercase text-white/40 mb-4">Core Objective</div>
+<h2 class="text-2xl font-bold text-white mb-6">The Mission</h2>
+<div class="space-y-6 text-on-surface-variant leading-relaxed">
+<p>Our goal is to synchronize the latency between human intent and machine execution. By leveraging neural processing at the kernel level, MachinaOS anticipates needs before they are articulated.</p>
+<p>We believe that the future of computing isn't a device you carry—it's an invisible layer of intelligence that permeates your environment.</p>
+</div>
+</div>
+<!-- Bento Style Stats -->
+<div class="grid grid-cols-2 gap-4">
+<div class="glass-panel p-6 rounded-xl border border-white/5 flex flex-col justify-between">
+<span class="text-primary text-3xl font-light">0.4ms</span>
+<span class="text-[10px] tracking-widest uppercase text-white/50">Kernel Latency</span>
+</div>
+<div class="glass-panel p-6 rounded-xl border border-white/5 flex flex-col justify-between">
+<span class="text-primary text-3xl font-light">99.9%</span>
+<span class="text-[10px] tracking-widest uppercase text-white/50">Neural Uptime</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Visionary Image (Placeholder) -->
+<div class="mb-32 w-full aspect-video rounded-xl overflow-hidden glass-panel border border-white/5 relative">
+<img class="w-full h-full object-cover opacity-60" data-alt="Abstract cyan neural network grid connecting points in dark void" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOpNojtUUIvCN-fHDy4H6B3pxJyrWgBSM58KxHc7EOISu2Mt5n0aup0LkRPBe_KroTZbsxWqqOqJVuZMybIv1TEEuP0ga2Dp4yK-C2k_GsvSDzOJBffPe2G7gVd-4lrHAF2LlHwJ8-bnsUsPAKoObGw5iJbSuNIS3GMMRX-3z9NFr0cqJqiHpM7UX_zxxXKe7hr3_0Oolb4y9oT5Ji5y2h-erKEdU_CpR41P7Gbk9l4duqxXVcUoN1H8H0mlpaIkCWsDLzswn_9jI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-80"></div>
+<div class="absolute bottom-6 left-6 right-6">
+<p class="text-[10px] tracking-widest uppercase text-white/80 font-bold mb-2">Internal Visualization</p>
+<p class="text-sm font-light text-white/60">Machina-1 Cluster: Real-time synapse mapping across distributed nodes.</p>
+</div>
+</div>
+<!-- The Team Section -->
+<section class="mb-24">
+<div class="mb-12">
+<div class="w-12 h-[2px] bg-primary mb-6"></div>
+<h2 class="text-3xl font-bold text-white">The Neuralists</h2>
+<p class="text-on-surface-variant mt-4 font-light">A collective of architects, cognitive scientists, and void-walkers based in the digital periphery.</p>
+</div>
+<div class="space-y-4">
+<!-- Team Member 1 -->
+<div class="glass-panel p-4 rounded-xl border border-white/5 flex items-center gap-6 group hover:bg-white/5 transition-all">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-primary/20">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Minimalist portrait of a high-tech software architect" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzVcwzM2UfsfzD3cN2a7ai9JtN9F8-gQiIbXfEbjMCQsx3Gm-YmBaEnjMZyg0OITb5ha-Jfy-2molcNKxqtzsfb9wuIzZVd3IudiudGvIxWSJHLnggCrcT-gIBCRQSXDcaq1E7BjkSWrQnLQk1yichcsY5RJf4qHOn-RIv6yVQzZfV1o5X4V7wima2EURID80g0mUJVdSU6oL1WYlgwQtCVQlTUtnzZj5FFDcvXNDGdwovZCjH4vZNCdfhGo-4OU-Rl4fLlkVhiPU"/>
+</div>
+<div>
+<h4 class="text-white font-medium uppercase tracking-wider text-sm">Vesper Thorne</h4>
+<p class="text-[10px] text-primary tracking-[0.1em] uppercase">Founding Architect</p>
+</div>
+</div>
+<!-- Team Member 2 -->
+<div class="glass-panel p-4 rounded-xl border border-white/5 flex items-center gap-6 group hover:bg-white/5 transition-all">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Professional profile of a cognitive science expert" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV_jpWvU7m-tPWv13CU8HKrwcppBPVxxK4NphMjbKbgd02EgwsU3xFQfyJkrKFh1vD7FCemTz6tPy_WKbFm-ZPhnvc5okMr9zeEfYHy_hNNmi-mGvzLhxAnA5jTmc92bv8xqen92v3oL2Hs5vfS62ZNQlFUsBmBZyi1EXEUxGsoRdrBQA156Fa9c2ayBt0n0MCvuVRh1vDRd0A_jWRLkkKNBx8cBEoGvE4qWDTZKXiYkPpRstIHBoVrrcOM7-sTsJjlLwsgfDPVnE"/>
+</div>
+<div>
+<h4 class="text-white font-medium uppercase tracking-wider text-sm">Elias Vance</h4>
+<p class="text-[10px] text-white/40 tracking-[0.1em] uppercase">Cognitive Strategist</p>
+</div>
+</div>
+<!-- Team Member 3 -->
+<div class="glass-panel p-4 rounded-xl border border-white/5 flex items-center gap-6 group hover:bg-white/5 transition-all">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Futuristic software engineer with glowing light accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz3ynmhe0FIme5BtOtYIfykK9M14QLqxmeARqZ5BA72nipGNx2xn-4i-tv4IKg5g5eLRhwCtMQ2pBDhcNurChw8IUTzBDvCYyFsC45a7QQ1Q_beuW9lzka2J3bx_OovtMjaZe2Bc2dUffbLayoYuZyy21T7yvuSH39jhMd7ABIrcfnUfwDkMaoiZkOitv9iclQNB3JBRtPPBMi0yBizAwi9bXX-zL4FxbeQpczjV5Qet8tt2V2Ie2M6OLa4zsUhsgaw5eWwGCGyz0"/>
+</div>
+<div>
+<h4 class="text-white font-medium uppercase tracking-wider text-sm">Sora Kael</h4>
+<p class="text-[10px] text-white/40 tracking-[0.1em] uppercase">Protocol Lead</p>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="mb-24 text-center py-16 border-y border-white/5">
+<h3 class="text-2xl font-light text-white mb-6">Ready to transcend the interface?</h3>
+<button class="bg-primary text-black px-10 py-4 rounded-lg font-extrabold uppercase tracking-widest text-xs hover:shadow-[0_0_20px_rgba(13,242,242,0.4)] transition-all">
+                Access the Beta
+            </button>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-white/5 bg-black dark:bg-black">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6 max-w-screen-2xl mx-auto">
+<div class="flex flex-col gap-2 items-center md:items-start">
+<div class="text-lg font-bold text-[#0df2f2]">MachinaOS</div>
+<div class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/50">© 2024 MachinaOS. Neuralized in the Void.</div>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Documentation</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Discord</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Twitter</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">GitHub</a>
+</div>
+</div>
+</footer>
+<!-- Mobile Bottom NavBar (Suppressed on this deep content page per rules - using static TopNav navigation) -->
+</body></html>

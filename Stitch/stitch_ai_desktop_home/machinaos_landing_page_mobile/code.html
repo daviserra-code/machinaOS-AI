@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MachinaOS | The First Neural-Native OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#9a3412",
+                        "secondary-fixed": "#cbd5e1",
+                        "on-surface": "#f1f5f9",
+                        "surface-dim": "#050b0b",
+                        "surface-bright": "#1a2424",
+                        "error": "#ef4444",
+                        "secondary": "#94a3b8",
+                        "on-error-container": "#f87171",
+                        "secondary-fixed-dim": "#94a3b8",
+                        "tertiary-fixed-dim": "#fed7aa",
+                        "tertiary-fixed": "#ffedd5",
+                        "on-secondary-container": "#f1f5f9",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#0bcbcb",
+                        "outline-variant": "rgba(255, 255, 255, 0.05)",
+                        "surface-container-lowest": "#040808",
+                        "surface-container": "#111d1d",
+                        "on-surface-variant": "#94a3b8",
+                        "on-secondary": "#081212",
+                        "on-tertiary-container": "#fdba74",
+                        "secondary-container": "#1e293b",
+                        "on-background": "#f1f5f9",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#f1f5f9",
+                        "surface": "#081212",
+                        "on-tertiary-fixed": "#7c2d12",
+                        "tertiary-container": "rgba(249, 115, 22, 0.2)",
+                        "on-primary-fixed-variant": "#004f4f",
+                        "primary-container": "rgba(13, 242, 242, 0.2)",
+                        "on-secondary-fixed": "#0f172a",
+                        "inverse-primary": "#006a6a",
+                        "error-container": "#450a0a",
+                        "primary-fixed": "#0df2f2",
+                        "on-primary-container": "#0df2f2",
+                        "on-secondary-fixed-variant": "#334155",
+                        "surface-container-highest": "#263535",
+                        "background": "#081212",
+                        "surface-container-low": "#0d1818",
+                        "primary": "#0df2f2",
+                        "inverse-on-surface": "#081212",
+                        "on-primary": "#081212",
+                        "on-primary-fixed": "#000000",
+                        "surface-variant": "rgba(255, 255, 255, 0.05)",
+                        "surface-tint": "#0df2f2",
+                        "outline": "rgba(255, 255, 255, 0.1)",
+                        "tertiary": "#f97316",
+                        "surface-container-high": "#1b2929"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .neural-glow {
+            background: radial-gradient(circle at center, rgba(13, 242, 242, 0.15) 0%, rgba(8, 18, 18, 0) 70%);
+        }
+        .glass-card {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.03);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar Navigation Shell -->
+<nav class="docked full-width top-0 sticky z-50 bg-black/5 backdrop-blur-xl bg-white/5 shadow-2xl">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-light tracking-[0.2em] uppercase text-white">
+                Machina<span class="text-[#0df2f2] font-bold">OS</span>
+</div>
+<!-- Mobile Toggle Placeholder (Visual only) -->
+<div class="md:hidden">
+<span class="material-symbols-outlined text-[#0df2f2]">menu</span>
+</div>
+<!-- Desktop Links (Hidden on Mobile) -->
+<div class="hidden md:flex items-center gap-8 font-['Inter'] font-normal tracking-wide text-sm uppercase">
+<a class="text-white/70 hover:text-[#0df2f2] transition-colors duration-300" href="#">Features</a>
+<a class="text-white/70 hover:text-[#0df2f2] transition-colors duration-300" href="#">Pricing</a>
+<a class="text-white/70 hover:text-[#0df2f2] transition-colors duration-300" href="#">About</a>
+<button class="bg-[#0df2f2] text-[#081212] px-6 py-2 rounded-lg font-bold hover:scale-105 active:scale-95 duration-200 transition-all">
+                    Launch Demo
+                </button>
+</div>
+</div>
+</nav>
+<main class="relative overflow-hidden">
+<!-- Ambient Glow Background -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full neural-glow pointer-events-none -z-10"></div>
+<!-- Hero Section -->
+<section class="relative min-h-[795px] flex flex-col items-center justify-center px-6 pt-20 pb-12 text-center">
+<!-- Neural Core Visual -->
+<div class="relative w-64 h-64 mb-12 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-2 border-primary/20 animate-[pulse_4s_ease-in-out_infinite]"></div>
+<div class="absolute inset-4 rounded-full border border-primary/40 animate-[spin_10s_linear_infinite]"></div>
+<div class="absolute inset-8 rounded-full border-t-2 border-primary shadow-[0_0_30px_#0df2f2] animate-[spin_3s_linear_infinite]"></div>
+<div class="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-[0_0_50px_#0df2f2]">
+<span class="material-symbols-outlined text-on-primary text-4xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">neurology</span>
+</div>
+</div>
+<h1 class="text-4xl md:text-7xl font-light tracking-widest uppercase mb-4 leading-tight">
+                The First <br/> <span class="font-extrabold text-primary">Neural-Native</span> OS
+            </h1>
+<p class="text-on-surface-variant max-w-md mx-auto mb-10 text-sm md:text-base leading-relaxed tracking-wide">
+                Experience an operating system that thinks with you. Fully decentralized, hyper-optimized, and built for the age of synthetic intelligence.
+            </p>
+<div class="flex flex-col gap-4 w-full max-w-xs">
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold uppercase tracking-widest hover:shadow-[0_0_20px_rgba(13,242,242,0.4)] transition-all active:scale-95">
+                    Initialize Setup
+                </button>
+<button class="w-full py-4 bg-white/5 border border-white/10 text-white rounded-xl font-medium backdrop-blur-md hover:bg-white/10 transition-all">
+                    View Manifesto
+                </button>
+</div>
+</section>
+<!-- Feature Highlights - Bento Style -->
+<section class="px-6 py-20 max-w-screen-xl mx-auto">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2 mb-4">
+<span class="h-[1px] w-8 bg-primary"></span>
+<span class="text-[10px] uppercase tracking-[0.2em] font-bold text-primary">Core Modules</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Bento Item 1 -->
+<div class="glass-card p-6 rounded-xl border border-white/5 flex flex-col gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">psychology</span>
+<h3 class="text-xl font-bold uppercase tracking-tight">Synaptic Search</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Context-aware retrieval that anticipates your next workflow before you even initiate it.</p>
+</div>
+<!-- Bento Item 2 -->
+<div class="glass-card p-6 rounded-xl border border-white/5 flex flex-col gap-4 md:col-span-2 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">dynamic_form</span>
+</div>
+<span class="material-symbols-outlined text-primary text-3xl">shield_with_heart</span>
+<h3 class="text-xl font-bold uppercase tracking-tight">Neural Privacy Shell</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed max-w-xs">Your data never leaves the local node. MachinaOS uses localized LLMs to ensure your digital footprint remains invisible to the cloud.</p>
+</div>
+<!-- Bento Item 3 -->
+<div class="glass-card p-6 rounded-xl border border-white/5 flex flex-col gap-4 md:col-span-2">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+<div class="bg-primary/10 px-2 py-1 rounded text-[10px] text-primary font-bold uppercase tracking-tighter">Active</div>
+</div>
+<h3 class="text-xl font-bold uppercase tracking-tight">Kernel 0.9 Beta</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Direct hardware acceleration for neural processing units (NPU) out of the box.</p>
+<div class="w-full h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
+<div class="w-3/4 h-full bg-primary shadow-[0_0_8px_#0df2f2]"></div>
+</div>
+</div>
+<!-- Bento Item 4 -->
+<div class="glass-card p-6 rounded-xl border border-white/5 flex flex-col gap-4 bg-primary/5">
+<span class="material-symbols-outlined text-primary text-3xl">hub</span>
+<h3 class="text-xl font-bold uppercase tracking-tight">Ecosystem</h3>
+<p class="text-xs text-on-surface-variant leading-relaxed">Bridging the gap between human intent and machine execution seamlessly.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Waitlist Section -->
+<section class="px-6 py-24 relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 -z-10 skew-y-3 translate-y-20"></div>
+<div class="max-w-md mx-auto text-center flex flex-col items-center">
+<span class="material-symbols-outlined text-primary text-5xl mb-6">sensors</span>
+<h2 class="text-3xl font-light uppercase tracking-[0.15em] mb-4">Ready to evolve?</h2>
+<p class="text-sm text-on-surface-variant mb-8 px-4">Join the waitlist for the MachinaOS Genesis release. Early access slots are strictly limited.</p>
+<div class="w-full flex flex-col gap-3">
+<input class="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-center text-sm font-label tracking-widest focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-white/20" placeholder="NEURAL_ID@HOST.COM" type="email"/>
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(13,242,242,0.2)] active:scale-95 transition-all">
+                        Request Access
+                    </button>
+</div>
+<p class="mt-6 text-[10px] uppercase tracking-widest text-white/30">
+                    Priority given to Neural Node holders.
+                </p>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-white/5 bg-black dark:bg-black">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6 max-w-screen-2xl mx-auto">
+<div class="flex flex-col items-center md:items-start gap-2">
+<div class="text-lg font-bold text-[#0df2f2]">MachinaOS</div>
+<div class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/50">
+                    © 2024 MachinaOS. Neuralized in the Void.
+                </div>
+</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Documentation</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">Discord</a>
+<a class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/40 hover:text-white transition-all" href="#">GitHub</a>
+</div>
+</div>
+</footer>
+<!-- BottomNavBar for Mobile -->
+<div class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] glass-card rounded-2xl border border-white/10 shadow-2xl px-6 py-4 flex justify-around items-center">
+<div class="flex flex-col items-center gap-1 text-[#0df2f2]">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[8px] font-bold uppercase tracking-tighter">OS</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/40">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-[8px] font-bold uppercase tracking-tighter">Nodes</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/40">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-[8px] font-bold uppercase tracking-tighter">Graph</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/40">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[8px] font-bold uppercase tracking-tighter">Core</span>
+</div>
+</div>
+</body></html>

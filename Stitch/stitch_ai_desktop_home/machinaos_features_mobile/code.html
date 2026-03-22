@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MachinaOS | Core Modules</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#9a3412",
+              "secondary-fixed": "#cbd5e1",
+              "on-surface": "#f1f5f9",
+              "surface-dim": "#050b0b",
+              "surface-bright": "#1a2424",
+              "error": "#ef4444",
+              "secondary": "#94a3b8",
+              "on-error-container": "#f87171",
+              "secondary-fixed-dim": "#94a3b8",
+              "tertiary-fixed-dim": "#fed7aa",
+              "tertiary-fixed": "#ffedd5",
+              "on-secondary-container": "#f1f5f9",
+              "on-error": "#ffffff",
+              "primary-fixed-dim": "#0bcbcb",
+              "outline-variant": "rgba(255, 255, 255, 0.05)",
+              "surface-container-lowest": "#040808",
+              "surface-container": "#111d1d",
+              "on-surface-variant": "#94a3b8",
+              "on-secondary": "#081212",
+              "on-tertiary-container": "#fdba74",
+              "secondary-container": "#1e293b",
+              "on-background": "#f1f5f9",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#f1f5f9",
+              "surface": "#081212",
+              "on-tertiary-fixed": "#7c2d12",
+              "tertiary-container": "rgba(249, 115, 22, 0.2)",
+              "on-primary-fixed-variant": "#004f4f",
+              "primary-container": "rgba(13, 242, 242, 0.2)",
+              "on-secondary-fixed": "#0f172a",
+              "inverse-primary": "#006a6a",
+              "error-container": "#450a0a",
+              "primary-fixed": "#0df2f2",
+              "on-primary-container": "#0df2f2",
+              "on-secondary-fixed-variant": "#334155",
+              "surface-container-highest": "#263535",
+              "background": "#081212",
+              "surface-container-low": "#0d1818",
+              "primary": "#0df2f2",
+              "inverse-on-surface": "#081212",
+              "on-primary": "#081212",
+              "on-primary-fixed": "#000000",
+              "surface-variant": "rgba(255, 255, 255, 0.05)",
+              "surface-tint": "#0df2f2",
+              "outline": "rgba(255, 255, 255, 0.1)",
+              "tertiary": "#f97316",
+              "surface-container-high": "#1b2929"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-glow {
+            background: radial-gradient(circle at center, rgba(13, 242, 242, 0.08) 0%, transparent 70%);
+        }
+        .glass-panel {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.03);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen selection:bg-primary/30">
+<!-- Ambient Glow Background -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden">
+<div class="absolute -top-1/4 -left-1/4 w-full h-full bg-glow opacity-50"></div>
+<div class="absolute -bottom-1/4 -right-1/4 w-full h-full bg-glow opacity-30"></div>
+</div>
+<!-- TopNavBar -->
+<header class="docked full-width top-0 sticky z-50 bg-black/5 dark:bg-black/5 backdrop-blur-xl shadow-2xl bg-white/5">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-light tracking-[0.2em] uppercase text-white">MachinaOS</div>
+<nav class="hidden md:flex items-center gap-8 font-['Inter'] font-normal tracking-wide text-sm uppercase">
+<a class="text-[#0df2f2] font-medium border-b border-[#0df2f2] pb-1 hover:text-[#0df2f2] transition-colors duration-300" href="#">Features</a>
+<a class="text-white/70 hover:text-[#0df2f2] transition-colors duration-300" href="#">Pricing</a>
+<a class="text-white/70 hover:text-[#0df2f2] transition-colors duration-300" href="#">About</a>
+</nav>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-bold text-xs uppercase tracking-widest active:scale-95 duration-200">
+                Launch Demo
+            </button>
+</div>
+</header>
+<main class="relative z-10 px-6 py-12 max-w-xl mx-auto space-y-12">
+<!-- Hero Header -->
+<section class="text-center space-y-4">
+<span class="text-[10px] tracking-[0.2em] uppercase text-primary font-bold">Protocol v4.0</span>
+<h1 class="text-4xl md:text-5xl font-light tracking-tight text-white leading-tight">
+                Neural <span class="text-primary italic">Architecture</span>
+</h1>
+<p class="text-secondary text-sm font-light max-w-xs mx-auto leading-relaxed opacity-80">
+                Experience the evolution of computational clarity through our core neural modules.
+            </p>
+</section>
+<!-- Features Stack -->
+<div class="space-y-6">
+<!-- Neural Indexing -->
+<div class="glass-panel rounded-xl border border-outline p-6 space-y-4 group">
+<div class="flex items-center justify-between">
+<div class="p-3 rounded-lg bg-primary-container text-primary">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<span class="text-[10px] tracking-widest text-white/30 uppercase">Module 01</span>
+</div>
+<div class="space-y-2">
+<h3 class="text-xl font-medium text-white group-hover:text-primary transition-colors">Neural Indexing</h3>
+<p class="text-secondary text-sm font-light leading-snug">
+                        Synchronize your raw data streams into a structured synaptic map for instant cross-reference.
+                    </p>
+</div>
+<div class="pt-2">
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3 shadow-[0_0_10px_#0df2f2]"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-white/40 uppercase">Indexing status</span>
+<span class="text-[10px] text-primary uppercase font-bold">68% Optimized</span>
+</div>
+</div>
+</div>
+<!-- Contextual Explorer -->
+<div class="glass-panel rounded-xl border border-outline p-6 space-y-4 group">
+<div class="flex items-center justify-between">
+<div class="p-3 rounded-lg bg-white/5 text-white/70 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">travel_explore</span>
+</div>
+<span class="text-[10px] tracking-widest text-white/30 uppercase">Module 02</span>
+</div>
+<div class="space-y-2">
+<h3 class="text-xl font-medium text-white group-hover:text-primary transition-colors">Contextual Explorer</h3>
+<p class="text-secondary text-sm font-light leading-snug">
+                        An immersive 3D interface to navigate deep-level connections across your entire digital history.
+                    </p>
+</div>
+<div class="flex gap-2">
+<span class="px-2 py-1 rounded bg-white/5 text-[10px] text-white/50 border border-white/5 uppercase">Real-time</span>
+<span class="px-2 py-1 rounded bg-white/5 text-[10px] text-white/50 border border-white/5 uppercase">Synaptic</span>
+</div>
+</div>
+<!-- Agent Command Center -->
+<div class="glass-panel rounded-xl border border-outline p-6 space-y-4 group">
+<div class="flex items-center justify-between">
+<div class="p-3 rounded-lg bg-white/5 text-white/70 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">hub</span>
+</div>
+<span class="text-[10px] tracking-widest text-white/30 uppercase">Module 03</span>
+</div>
+<div class="space-y-2">
+<h3 class="text-xl font-medium text-white group-hover:text-primary transition-colors">Agent Command Center</h3>
+<p class="text-secondary text-sm font-light leading-snug">
+                        Deploy autonomous agents to execute complex tasks, monitoring every operation via terminal readout.
+                    </p>
+</div>
+<div class="grid grid-cols-2 gap-3 pt-2">
+<div class="flex items-center gap-2 bg-white/5 p-2 rounded-lg border border-white/5">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] uppercase text-white/60">Active Nodes: 12</span>
+</div>
+<div class="flex items-center gap-2 bg-white/5 p-2 rounded-lg border border-white/5">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary"></div>
+<span class="text-[10px] uppercase text-white/60">Load: 24.1ms</span>
+</div>
+</div>
+</div>
+<!-- Neural Vault -->
+<div class="glass-panel rounded-xl border border-outline p-6 space-y-4 group">
+<div class="flex items-center justify-between">
+<div class="p-3 rounded-lg bg-white/5 text-white/70 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">encrypted</span>
+</div>
+<span class="text-[10px] tracking-widest text-white/30 uppercase">Module 04</span>
+</div>
+<div class="space-y-2">
+<h3 class="text-xl font-medium text-white group-hover:text-primary transition-colors">Neural Vault</h3>
+<p class="text-secondary text-sm font-light leading-snug">
+                        Military-grade encryption for your most sensitive neural signatures and personal metadata.
+                    </p>
+</div>
+<div class="flex items-center gap-2 pt-2">
+<span class="material-symbols-outlined text-sm text-primary">verified_user</span>
+<span class="text-[10px] text-white/40 uppercase tracking-widest">Quantum-Resistant Layer Active</span>
+</div>
+</div>
+</div>
+<!-- CTA Section -->
+<section class="py-12 flex flex-col items-center text-center space-y-6">
+<div class="w-16 h-16 rounded-full border border-primary/20 flex items-center justify-center relative">
+<div class="absolute inset-0 rounded-full border-t border-primary animate-spin" style="animation-duration: 3s;"></div>
+<span class="material-symbols-outlined text-primary">bolt</span>
+</div>
+<div class="space-y-2">
+<h2 class="text-2xl font-light text-white tracking-wide uppercase">Initialize Protocol</h2>
+<p class="text-secondary text-xs uppercase tracking-tighter opacity-60">Ready to synchronize with MachinaOS?</p>
+</div>
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-sm shadow-[0_0_20px_rgba(13,242,242,0.3)] active:scale-95 transition-transform">
+                Get Started
+            </button>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-white/5 bg-black dark:bg-black">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-6">
+<div class="text-lg font-bold text-[#0df2f2] tracking-tighter">MachinaOS</div>
+<div class="flex flex-wrap justify-center gap-6 font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/50">
+<a class="hover:text-white transition-all" href="#">Documentation</a>
+<a class="hover:text-white transition-all" href="#">Privacy Policy</a>
+<a class="hover:text-white transition-all" href="#">Terms of Service</a>
+<a class="hover:text-white transition-all" href="#">Discord</a>
+<a class="hover:text-white transition-all" href="#">Twitter</a>
+<a class="hover:text-white transition-all" href="#">GitHub</a>
+</div>
+<div class="font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-white/50">
+                © 2024 MachinaOS. Neuralized in the Void.
+            </div>
+</div>
+</footer>
+<!-- Bottom Nav Dock (Mobile Only) -->
+<div class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm">
+<div class="glass-panel rounded-full border border-white/10 px-6 py-4 flex justify-between items-center shadow-2xl">
+<a class="p-2 rounded-xl text-[#0df2f2] bg-primary/10" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+</a>
+<a class="p-2 rounded-xl text-white/40 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+</a>
+<a class="p-2 rounded-xl text-white/40 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+</a>
+<a class="p-2 rounded-xl text-white/40 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</div>
+</div>
+</body></html>
