@@ -8,10 +8,10 @@
 param(
     [string]$CommitMessage = "Update deployment",
     [switch]$PushToGit,
-    [string]$ServerIp = "46.224.91.14",
+    [string]$ServerIp = "46.224.66.48",
     [string]$ServerUser = "root",
-    [string]$ProjectPath = "/opt/machina",
-    [string]$WebRoot = "/var/www/machina-intelligence"
+    [string]$ProjectPath = "/opt/machinaos",
+    [string]$WebRoot = "/var/www/machinaos"
 )
 
 $ErrorActionPreference = "Stop"
@@ -56,7 +56,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "`nDeployment completed successfully!" -ForegroundColor Green
-Write-Host "Live at: https://machina-intelligence.com" -ForegroundColor Cyan
+Write-Host "Live at: https://machinaos.ai" -ForegroundColor Cyan
 
 # Optional step: commit and push after successful deploy.
 if ($PushToGit) {

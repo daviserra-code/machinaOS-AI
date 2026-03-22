@@ -5,8 +5,8 @@
 
 set -euo pipefail
 
-PROJECT_PATH="/opt/machina"
-WEB_ROOT="/var/www/machina-intelligence"
+PROJECT_PATH="/opt/machinaos"
+WEB_ROOT="/var/www/machinaos"
 
 echo "Starting Machina deployment..."
 
