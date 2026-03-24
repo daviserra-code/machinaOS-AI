@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MachinaOS User Stories | Real Workflows, Real Execution</title>
+    <meta
+      name="description"
+      content="See how developers, engineers, and technical teams use MachinaOS to onboard codebases, debug issues, run governed workflows, and coordinate agents with full traceability."
+    />
+    <link rel="canonical" href="https://machinaos.ai/user-stories" />
+    <link rel="stylesheet" href="assets/styles.css?v=2" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="site-wrap topbar-inner">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy">Machina<span>OS</span></span></a>
+        <nav class="nav-links" aria-label="Primary">
+          <a data-nav href="index.html">Home</a>
+          <a data-nav href="screens.html">Screens</a>
+          <a data-nav href="features.html">Features</a>
+          <a data-nav href="user-stories.html">User Stories</a>
+          <a data-nav href="demo-guide.html">Demo Guide</a>
+          <a data-nav href="pricing.html">Pricing</a>
+          <a data-nav href="about.html">About</a>
+          <a data-nav href="contact.html">Contact</a>
+          <a data-nav href="links.html">Links</a>
+          <a class="btn btn-demo" href="demo-guide.html" data-demo-trigger>Launch Demo</a>
+        </nav>
+        <button class="btn btn-ghost mobile-toggle" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+      </div>
+      <div class="site-wrap mobile-menu" id="mobile-menu" data-mobile-menu hidden>
+        <a data-nav href="index.html">Home</a>
+        <a data-nav href="screens.html">Screens</a>
+        <a data-nav href="features.html">Features</a>
+        <a data-nav href="user-stories.html">User Stories</a>
+        <a data-nav href="demo-guide.html">Demo Guide</a>
+        <a data-nav href="pricing.html">Pricing</a>
+        <a data-nav href="about.html">About</a>
+        <a data-nav href="contact.html">Contact</a>
+        <a data-nav href="links.html">Links</a>
+      </div>
+    </header>
+
+    <main class="site-wrap">
+
+      <section class="section reveal">
+        <span class="kicker">Real workflows, real execution</span>
+        <h1>What People Use <strong>Machina</strong> For</h1>
+        <p class="lead">Machina turns intent into visible, governed execution. Here is what that looks like in practice — from repo onboarding to multi-agent coordination.</p>
+      </section>
+
+      <!-- Flagship stories -->
+      <section class="section reveal">
+        <div class="section-head"><span>Flagship Stories</span></div>
+        <div class="card-grid">
+
+          <article class="card col-12">
+            <span class="kicker">Story 1</span>
+            <h3>Repo Onboarding</h3>
+            <p><em>As a developer, I want to understand an unfamiliar codebase quickly so I can become productive fast.</em></p>
+            <p class="card-prompt">"Scan this workspace, tell me what stack it uses, what the key files are, and where I should start."</p>
+            <ul>
+              <li>Scans the workspace and detects stack clues</li>
+              <li>Identifies key files and entry points</li>
+              <li>Reads README and config files</li>
+              <li>Summarizes architecture hints</li>
+              <li>Shows which tools and steps were used</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> The developer understands the project in minutes instead of manually exploring for an hour.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 2</span>
+            <h3>Environment Preparation</h3>
+            <p><em>As a developer, I want Machina to prepare my project workspace so I can start working without manual setup friction.</em></p>
+            <p class="card-prompt">"Prepare this project for work."</p>
+            <ul>
+              <li>Inspects the repo and project structure</li>
+              <li>Opens the workspace context</li>
+              <li>Runs safe setup commands where allowed</li>
+              <li>Surfaces missing dependencies or issues</li>
+              <li>Asks for approval before riskier actions</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Project setup becomes a guided execution flow instead of a manual checklist.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 3</span>
+            <h3>Debug Workflow</h3>
+            <p><em>As an engineer, I want Machina to help me inspect an issue across code, diagnostics, and repo state.</em></p>
+            <p class="card-prompt">"Debug this issue in the current workspace."</p>
+            <ul>
+              <li>Reads diagnostics and searches code semantically</li>
+              <li>Checks repo state and diffs</li>
+              <li>Runs safe commands</li>
+              <li>Chains the investigation as a workflow</li>
+              <li>Summarizes likely causes and next actions</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Debugging becomes structured, inspectable, and faster.</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Extended stories -->
+      <section class="section reveal">
+        <div class="section-head"><span>Extended Stories</span></div>
+        <div class="card-grid">
+
+          <article class="card col-6">
+            <span class="kicker">Story 4</span>
+            <h3>Technical Review</h3>
+            <p><em>As a tech lead, I want a quick summary of project state and risky areas before reviewing changes.</em></p>
+            <p class="card-prompt">"Inspect this repo, summarize the current state, and show me risky areas."</p>
+            <ul>
+              <li>Checks repo contents and status</li>
+              <li>Highlights high-risk files or changes</li>
+              <li>Exposes runtime steps and events</li>
+              <li>Requires approval for any mutating actions</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Technical review starts with a reliable operational snapshot.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 5</span>
+            <h3>Consultancy Discovery</h3>
+            <p><em>As a consultant, I want to map a client project quickly and identify the important integration points.</em></p>
+            <p class="card-prompt">"Map the project, explain the architecture clues, and highlight integration points."</p>
+            <ul>
+              <li>Scans workspace structure</li>
+              <li>Identifies frameworks and languages</li>
+              <li>Uses semantic search for concepts</li>
+              <li>Stores findings as reusable context</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Discovery work becomes faster and more repeatable.</p>
+          </article>
+
+          <article class="card col-4">
+            <span class="kicker">Story 6</span>
+            <h3>Repeatable Workflows</h3>
+            <p><em>As an engineering team, we want to convert repeated routines into reusable workflows.</em></p>
+            <p class="card-prompt">"Run the refactor workflow."</p>
+            <ul>
+              <li>Loads a predefined workflow</li>
+              <li>Executes ordered steps with context passing</li>
+              <li>Records execution history</li>
+              <li>Lets users inspect, retry, or approve steps</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Operational routines become reusable AI-native workflows.</p>
+          </article>
+
+          <article class="card col-4">
+            <span class="kicker">Story 7</span>
+            <h3>Multi-Agent Coordination</h3>
+            <p><em>As a user, I want specialized agents to collaborate on a task without manually orchestrating them.</em></p>
+            <p class="card-prompt">"Have one agent inspect the repo, another analyze diagnostics, and a third summarize the likely fix path."</p>
+            <ul>
+              <li>Assigns specialized roles and delegates work</li>
+              <li>Shows handoffs and message flow</li>
+              <li>Preserves approvals and event trace</li>
+              <li>Presents a combined result</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Complex analysis becomes coordinated and inspectable.</p>
+          </article>
+
+          <article class="card col-4">
+            <span class="kicker">Story 8</span>
+            <h3>Safe Governed Automation</h3>
+            <p><em>As a stakeholder, I want to see AI execution without giving the system uncontrolled power.</em></p>
+            <p class="card-prompt">"Run a gated command in this sandbox."</p>
+            <ul>
+              <li>Shows the plan before action</li>
+              <li>Pauses for approval on gated steps</li>
+              <li>Exposes timeline, metrics, and events</li>
+              <li>Allows approve / deny / retry / explain</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> The system demonstrates trust, governance, and runtime transparency.</p>
+          </article>
+
+          <article class="card col-12">
+            <span class="kicker">Story 9</span>
+            <h3>Desktop Technical Companion</h3>
+            <p><em>As a developer on my machine, I want a local desktop app that gives me a persistent AI shell for project work.</em></p>
+            <p class="card-prompt">"Open my current workspace and help me continue the last task."</p>
+            <ul>
+              <li>Launches as a desktop shell and restores context</li>
+              <li>Exposes workspace views and runtime state</li>
+              <li>Supports local-first operation with no cloud dependency</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Machina feels like an always-available technical operating layer, not a disposable browser assistant.</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Best fit -->
+      <section class="section reveal">
+        <div class="section-head"><span>Best-Fit Sectors</span></div>
+        <div class="card-grid">
+          <article class="card col-4">
+            <h3>Developer Tools / DevEx</h3>
+            <p>Workspace-centric workflows, codebase understanding, diagnostics, Git and VS Code integration, and operator shell interfaces.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Agent Orchestration</h3>
+            <p>Workflows, agent delegation, approvals, event-driven execution, and runtime governance for AI infrastructure teams.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Internal Technical Automation</h3>
+            <p>AI workspace operations, repeatable routines, and governed execution for internal engineering teams.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="cta reveal">
+        <h3>See it in action</h3>
+        <p class="lead">Walk through a real execution flow in the guided demo sandbox.</p>
+        <a class="btn btn-primary" href="demo-guide.html">Open Demo Guide</a>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="site-wrap footer-row">
+        <div class="brand">Machina<span>OS</span></div>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="index.html">Home</a>
+          <a href="screens.html">Screens</a>
+          <a href="features.html">Features</a>
+          <a href="user-stories.html">User Stories</a>
+          <a href="demo-guide.html">Demo Guide</a>
+          <a href="pricing.html">Pricing</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+          <a href="links.html">Links</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script src="assets/main.js"></script>
+  </body>
+</html>
