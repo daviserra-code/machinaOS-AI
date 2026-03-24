@@ -1,0 +1,64 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name machinaos.ai;
+    access_log /var/log/nginx/machinaos.access.log combined;
+    return 301 https://www.machinaos.ai$request_uri;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.machinaos.ai;
+    access_log /var/log/nginx/machinaos.access.log combined;
+    return 301 https://www.machinaos.ai$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name machinaos.ai;
+    access_log /var/log/nginx/machinaos.access.log combined;
+
+    ssl_certificate /etc/letsencrypt/live/machinaos.ai/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/machinaos.ai/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    return 301 https://www.machinaos.ai$request_uri;
+}
+
+server {
+    listen 443 ssl http2 default_server;
+    listen [::]:443 ssl http2 default_server;
+    server_name www.machinaos.ai;
+    access_log /var/log/nginx/machinaos.access.log combined;
+
+    root /var/www/machinaos;
+    index index.html;
+
+    location = /ops-console-8c7f43d1.html {
+        auth_basic "MachinaOS Private Analytics";
+        auth_basic_user_file /etc/nginx/.machinaos-analytics.htpasswd;
+        add_header Cache-Control "no-store" always;
+        add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
+        try_files $uri =404;
+    }
+
+    location ^~ /private-analytics/ {
+        auth_basic "MachinaOS Private Analytics";
+        auth_basic_user_file /etc/nginx/.machinaos-analytics.htpasswd;
+        add_header Cache-Control "no-store" always;
+        add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    ssl_certificate /etc/letsencrypt/live/machinaos.ai/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/machinaos.ai/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}

@@ -1,0 +1,1 @@
+*/5 * * * * root /usr/bin/python3 /usr/local/bin/machinaos-generate-analytics.py >/tmp/machinaos-analytics.log 2>&1

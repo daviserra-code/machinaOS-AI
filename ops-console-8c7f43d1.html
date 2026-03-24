@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MachinaOS Private Analytics</title>
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+    <meta
+      name="description"
+      content="Private MachinaOS analytics dashboard with human vs bot traffic, visits, pageviews, referrers, status codes, and recent activity."
+    />
+    <link rel="stylesheet" href="assets/styles.css?v=2" />
+    <style>
+      .analytics-shell {
+        padding: clamp(2rem, 5vw, 3rem) 0 4rem;
+      }
+
+      .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 1rem;
+      }
+
+      .metric-card {
+        grid-column: span 3;
+        border-radius: var(--radius-lg);
+        background: var(--bg-elev);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .metric-card h3 {
+        font-size: 0.78rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .metric-value {
+        margin-top: 0.65rem;
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .metric-meta {
+        margin-top: 0.55rem;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .analytics-panel {
+        grid-column: span 6;
+        border-radius: var(--radius-lg);
+        background: var(--bg-elev);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .analytics-panel.wide {
+        grid-column: span 12;
+      }
+
+      .analytics-panel h2 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .analytics-panel p {
+        color: var(--muted);
+      }
+
+      .bar-chart {
+        margin-top: 1rem;
+        display: grid;
+        gap: 0.65rem;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 90px 1fr 72px;
+        gap: 0.8rem;
+        align-items: center;
+      }
+
+      .bar-label,
+      .bar-value {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .bar-track {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, rgba(13, 242, 242, 0.35), rgba(13, 242, 242, 0.95));
+      }
+
+      .table-wrap {
+        margin-top: 1rem;
+        overflow-x: auto;
+      }
+
+      table.analytics-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+
+      .analytics-table th,
+      .analytics-table td {
+        padding: 0.7rem 0.4rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .analytics-table th {
+        color: var(--muted);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .analytics-chip-row {
+        margin-top: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+      }
+
+      .analytics-chip {
+        border-radius: 999px;
+        border: 1px solid rgba(13, 242, 242, 0.24);
+        background: rgba(13, 242, 242, 0.08);
+        color: var(--text);
+        padding: 0.4rem 0.7rem;
+        font-size: 0.74rem;
+      }
+
+      .analytics-state {
+        margin-top: 1rem;
+        color: var(--muted);
+      }
+
+      .analytics-alert {
+        margin-top: 1rem;
+        padding: 0.9rem 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(249, 115, 22, 0.3);
+        background: rgba(249, 115, 22, 0.08);
+        color: #ffd7bf;
+      }
+
+      @media (max-width: 960px) {
+        .metric-card,
+        .analytics-panel {
+          grid-column: span 12;
+        }
+
+        .bar-row {
+          grid-template-columns: 72px 1fr 56px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="site-wrap topbar-inner">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy">Machina<span>OS</span></span></a>
+        <nav class="nav-links" aria-label="Primary">
+          <a data-nav href="index.html">Home</a>
+          <a data-nav href="screens.html">Screens</a>
+          <a data-nav href="features.html">Features</a>
+          <a data-nav href="demo-guide.html">Demo Guide</a>
+          <a data-nav href="pricing.html">Pricing</a>
+          <a data-nav href="about.html">About</a>
+          <a data-nav href="contact.html">Contact</a>
+          <a data-nav href="links.html">Links</a>
+        </nav>
+        <button class="btn btn-ghost mobile-toggle" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+      </div>
+      <div class="site-wrap mobile-menu" id="mobile-menu" data-mobile-menu hidden>
+        <a data-nav href="index.html">Home</a>
+        <a data-nav href="screens.html">Screens</a>
+        <a data-nav href="features.html">Features</a>
+        <a data-nav href="demo-guide.html">Demo Guide</a>
+        <a data-nav href="pricing.html">Pricing</a>
+        <a data-nav href="about.html">About</a>
+        <a data-nav href="contact.html">Contact</a>
+        <a data-nav href="links.html">Links</a>
+      </div>
+    </header>
+
+    <main class="site-wrap analytics-shell">
+      <section class="section reveal">
+        <span class="kicker">Private Analytics</span>
+        <h1>Traffic <strong>Overview</strong></h1>
+        <p class="lead">Hidden operator dashboard backed directly by nginx access logs. No public navigation entry, no database, no tracking script.</p>
+        <div class="analytics-chip-row" id="analytics-meta"></div>
+        <div class="analytics-alert" id="analytics-note" hidden></div>
+      </section>
+
+      <section class="analytics-grid reveal" id="analytics-root">
+        <article class="metric-card">
+          <h3>Total Visits</h3>
+          <div class="metric-value" data-bind="visits.all">-</div>
+          <div class="metric-meta">Humans: <span data-bind="visits.human">-</span> · Bots: <span data-bind="visits.bot">-</span></div>
+        </article>
+        <article class="metric-card">
+          <h3>Pageviews</h3>
+          <div class="metric-value" data-bind="pageviews.all">-</div>
+          <div class="metric-meta">Humans: <span data-bind="pageviews.human">-</span> · Bots: <span data-bind="pageviews.bot">-</span></div>
+        </article>
+        <article class="metric-card">
+          <h3>Unique Visitors</h3>
+          <div class="metric-value" data-bind="unique_visitors.all">-</div>
+          <div class="metric-meta">Humans: <span data-bind="unique_visitors.human">-</span> · Bots: <span data-bind="unique_visitors.bot">-</span></div>
+        </article>
+        <article class="metric-card">
+          <h3>Total Requests</h3>
+          <div class="metric-value" data-bind="requests.all">-</div>
+          <div class="metric-meta">Humans: <span data-bind="requests.human">-</span> · Bots: <span data-bind="requests.bot">-</span></div>
+        </article>
+
+        <article class="analytics-panel wide">
+          <h2>Daily Trend</h2>
+          <p>Human and bot pageviews over the last 14 days.</p>
+          <div class="bar-chart" id="daily-chart"></div>
+        </article>
+
+        <article class="analytics-panel">
+          <h2>Top Pages</h2>
+          <div class="table-wrap"><table class="analytics-table"><thead><tr><th>Page</th><th>Views</th></tr></thead><tbody id="top-pages"></tbody></table></div>
+        </article>
+
+        <article class="analytics-panel">
+          <h2>Referrers</h2>
+          <div class="table-wrap"><table class="analytics-table"><thead><tr><th>Source</th><th>Visits</th></tr></thead><tbody id="top-referrers"></tbody></table></div>
+        </article>
+
+        <article class="analytics-panel">
+          <h2>Status Codes</h2>
+          <div class="table-wrap"><table class="analytics-table"><thead><tr><th>Status</th><th>Requests</th></tr></thead><tbody id="status-codes"></tbody></table></div>
+        </article>
+
+        <article class="analytics-panel">
+          <h2>Bot Breakdown</h2>
+          <div class="table-wrap"><table class="analytics-table"><thead><tr><th>Bot / Script</th><th>Requests</th></tr></thead><tbody id="bot-agents"></tbody></table></div>
+        </article>
+
+        <article class="analytics-panel wide">
+          <h2>Recent Human Activity</h2>
+          <div class="table-wrap"><table class="analytics-table"><thead><tr><th>Time</th><th>Path</th><th>IP</th><th>Referrer</th></tr></thead><tbody id="recent-activity"></tbody></table></div>
+        </article>
+      </section>
+
+      <div class="analytics-state" id="analytics-state">Loading analytics…</div>
+    </main>
+
+    <script src="assets/main.js"></script>
+    <script>
+      const analyticsState = document.getElementById("analytics-state");
+      const analyticsMeta = document.getElementById("analytics-meta");
+      const analyticsNote = document.getElementById("analytics-note");
+
+      function formatNumber(value) {
+        return new Intl.NumberFormat("en-US").format(value || 0);
+      }
+
+      function setBind(path, value) {
+        document.querySelectorAll(`[data-bind="${path}"]`).forEach((node) => {
+          node.textContent = formatNumber(value);
+        });
+      }
+
+      function createRows(targetId, items, columns) {
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        if (!items || !items.length) {
+          target.innerHTML = `<tr><td colspan="${columns}">No data yet.</td></tr>`;
+          return;
+        }
+        target.innerHTML = items
+          .map((item) => {
+            const cells = Object.values(item)
+              .map((value) => `<td>${value}</td>`)
+              .join("");
+            return `<tr>${cells}</tr>`;
+          })
+          .join("");
+      }
+
+      function renderDailyChart(series) {
+        const chart = document.getElementById("daily-chart");
+        if (!chart) return;
+        if (!series || !series.length) {
+          chart.innerHTML = "<div>No trend data yet.</div>";
+          return;
+        }
+
+        const peak = Math.max(...series.map((item) => item.human_pageviews + item.bot_pageviews), 1);
+        chart.innerHTML = series
+          .map((item) => {
+            const total = item.human_pageviews + item.bot_pageviews;
+            const width = Math.max((total / peak) * 100, 2);
+            return `
+              <div class="bar-row">
+                <div class="bar-label">${item.day}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+                <div class="bar-value">${formatNumber(total)}</div>
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      fetch("private-analytics/summary.json", { cache: "no-store" })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Analytics request failed with status ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setBind("visits.all", data.totals.visits.all);
+          setBind("visits.human", data.totals.visits.human);
+          setBind("visits.bot", data.totals.visits.bot);
+          setBind("pageviews.all", data.totals.pageviews.all);
+          setBind("pageviews.human", data.totals.pageviews.human);
+          setBind("pageviews.bot", data.totals.pageviews.bot);
+          setBind("unique_visitors.all", data.totals.unique_visitors.all);
+          setBind("unique_visitors.human", data.totals.unique_visitors.human);
+          setBind("unique_visitors.bot", data.totals.unique_visitors.bot);
+          setBind("requests.all", data.totals.requests.all);
+          setBind("requests.human", data.totals.requests.human);
+          setBind("requests.bot", data.totals.requests.bot);
+
+          analyticsMeta.innerHTML = `
+            <span class="analytics-chip">Generated: ${data.generated_at}</span>
+            <span class="analytics-chip">Source: ${data.log_source}</span>
+            <span class="analytics-chip">Window: ${data.window_days} days</span>
+            <span class="analytics-chip">Session gap: ${data.session_window_minutes} min</span>
+          `;
+
+          if (data.note) {
+            analyticsNote.hidden = false;
+            analyticsNote.textContent = data.note;
+          }
+
+          renderDailyChart(data.daily);
+          createRows("top-pages", data.top_pages.map((item) => ({ Path: item.path, Views: formatNumber(item.views) })), 2);
+          createRows("top-referrers", data.top_referrers.map((item) => ({ Source: item.referrer, Visits: formatNumber(item.visits) })), 2);
+          createRows("status-codes", data.status_codes.map((item) => ({ Status: item.status, Requests: formatNumber(item.count) })), 2);
+          createRows("bot-agents", data.bot_agents.map((item) => ({ Agent: item.agent, Requests: formatNumber(item.count) })), 2);
+          createRows("recent-activity", data.recent_human_activity.map((item) => ({ Time: item.time, Path: item.path, IP: item.ip, Referrer: item.referrer })), 4);
+
+          analyticsState.textContent = "Analytics loaded.";
+        })
+        .catch((error) => {
+          analyticsState.textContent = `Unable to load analytics: ${error.message}`;
+        });
+    </script>
+  </body>
+</html>

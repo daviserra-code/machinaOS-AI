@@ -65,10 +65,33 @@ a {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
   font-size: 1.2rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-weight: 300;
+}
+
+.brand-mark {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  flex: 0 0 auto;
+  background-image: url("logo-mark-dark.png?v=4");
+  background-repeat: no-repeat;
+  background-size: 190%;
+  background-position: 50% 8%;
+  mix-blend-mode: screen;
+  box-shadow: 0 0 20px rgba(13, 242, 242, 0.12);
+}
+
+.brand-copy {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.12rem;
 }
 
 .brand span {
