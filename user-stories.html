@@ -8,13 +8,33 @@
       name="description"
       content="See how developers, engineers, and technical teams use MachinaOS to onboard codebases, debug issues, run governed workflows, and coordinate agents with full traceability."
     />
-    <link rel="canonical" href="https://machinaos.ai/user-stories" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MachinaOS User Stories | Real Workflows, Real Execution" />
+    <meta property="og:description" content="How developers and engineering teams use MachinaOS for repo onboarding, debugging, and governed automation." />
+    <meta property="og:url" content="https://machinaos.ai/user-stories.html" />
+    <meta property="og:site_name" content="MachinaOS" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MachinaOS User Stories | Real Workflows, Real Execution" />
+    <meta name="twitter:description" content="Real developer workflows with governed AI execution." />
+    <link rel="canonical" href="https://machinaos.ai/user-stories.html" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://machinaos.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "User Stories", "item": "https://machinaos.ai/user-stories.html"}
+      ]
+    }
+    </script>
     <link rel="stylesheet" href="assets/styles.css?v=2" />
   </head>
   <body>
     <header class="topbar">
       <div class="site-wrap topbar-inner">
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy">Machina<span>OS</span></span></a>
+        <a class="brand" href="index.html"><span class="brand-copy">Machina<span>OS</span></span></a>
         <nav class="nav-links" aria-label="Primary">
           <a data-nav href="index.html">Home</a>
           <a data-nav href="screens.html">Screens</a>
@@ -191,6 +211,35 @@
             <p class="card-outcome"><strong>Outcome:</strong> Machina feels like an always-available technical operating layer, not a disposable browser assistant.</p>
           </article>
 
+          <article class="card col-6">
+            <span class="kicker">Story 10</span>
+            <h3>Security Audit Workflow</h3>
+            <p><em>As a security-conscious developer, I want to scan my codebase for vulnerabilities and ensure secrets never leak into logs.</em></p>
+            <p class="card-prompt">"Run a security scan on this repo and check for hardcoded secrets."</p>
+            <ul>
+              <li>Runs the built-in security-deep-scan chain template</li>
+              <li>Detects SQL injection, XSS, SSRF, command injection, and 10 more patterns with CWE IDs</li>
+              <li>Scrubs API keys, JWTs, and connection strings from all outputs before display</li>
+              <li>Stores findings in the immutable audit log with SHA-256 hash chain</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Security review is repeatable, evidence-backed, and leaves no sensitive data exposed in logs or the UI.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 11</span>
+            <h3>Visual Pipeline Design</h3>
+            <p><em>As a platform engineer, I want to design a multi-agent data pipeline visually and deploy it without writing orchestration code.</em></p>
+            <p class="card-prompt">"Build a pipeline that scans dependencies, checks for outdated packages, and opens a PR summary."</p>
+            <ul>
+              <li>Opens Visual Workflow Studio on a blank canvas</li>
+              <li>Drags tools from the palette and wires output ports to input ports</li>
+              <li>Clicks Auto-Assign to score and assign the best agents per step</li>
+              <li>Runs Optimize to detect parallelism opportunities and annotate the graph</li>
+              <li>Executes with live per-node debug overlays and streams results back</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Complex multi-agent pipelines are designed in minutes, not hours, with no YAML or orchestration DSL required.</p>
+          </article>
+
         </div>
       </section>
 
@@ -209,6 +258,18 @@
           <article class="card col-4">
             <h3>Internal Technical Automation</h3>
             <p>AI workspace operations, repeatable routines, and governed execution for internal engineering teams.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Security and Compliance</h3>
+            <p>Automated vulnerability scanning, credential scrubbing, SOC 2-style audit logs, and encrypted secrets vault for security-conscious teams.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Platform Engineering</h3>
+            <p>CI/CD pipeline integration, Docker and Kubernetes inspection, cross-platform release builds, and infrastructure scanning with agent blueprints.</p>
+          </article>
+          <article class="card col-4">
+            <h3>AI Research and Prototyping</h3>
+            <p>Multi-provider LLM switching, MCP protocol support for external tool servers, and visual workflow studio for iterating on agent architectures rapidly.</p>
           </article>
         </div>
       </section>

@@ -8,13 +8,42 @@
       name="description"
       content="Follow a preliminary MachinaOS onboarding flow: start the runtime, register a workspace, apply policy profile, and run your first inspectable plan before final protocol release."
     />
-    <link rel="canonical" href="https://machinaos.ai/demo-guide" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MachinaOS Demo Guide | Local Runtime Setup" />
+    <meta property="og:description" content="Step-by-step guide to setting up MachinaOS: initialize the local runtime, map workspace context, and run your first governed AI goal." />
+    <meta property="og:url" content="https://machinaos.ai/demo-guide.html" />
+    <meta property="og:site_name" content="MachinaOS" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MachinaOS Demo Guide | Local Runtime Setup" />
+    <meta name="twitter:description" content="Get started with MachinaOS: local runtime setup guide." />
+    <link rel="canonical" href="https://machinaos.ai/demo-guide.html" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://machinaos.ai/demo-guide.html#page",
+      "name": "MachinaOS Setup Guide — Getting Started Locally",
+      "description": "Step-by-step guide to initializing the MachinaOS local runtime, mapping workspace context, applying safety policies, and running your first governed AI goal.",
+      "url": "https://machinaos.ai/demo-guide.html",
+      "about": {"@id": "https://machinaos.ai/#software"},
+      "isPartOf": {"@id": "https://machinaos.ai/#website"},
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://machinaos.ai/"},
+          {"@type": "ListItem", "position": 2, "name": "Demo Guide", "item": "https://machinaos.ai/demo-guide.html"}
+        ]
+      }
+    }
+    </script>
     <link rel="stylesheet" href="assets/styles.css?v=2" />
   </head>
   <body>
     <header class="topbar">
       <div class="site-wrap topbar-inner">
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy">Machina<span>OS</span></span></a>
+        <a class="brand" href="index.html"><span class="brand-copy">Machina<span>OS</span></span></a>
         <nav class="nav-links" aria-label="Primary">
           <a data-nav href="index.html">Home</a>
           <a data-nav href="screens.html">Screens</a>
@@ -46,7 +75,7 @@
       <section class="section reveal">
         <span class="kicker">System Initialization</span>
         <h1>Activation <strong>Protocol</strong></h1>
-        <p class="lead">A practical preliminary onboarding flow to move from zero setup to your first approved, traceable intent execution.</p>
+        <p class="lead">A practical preliminary onboarding flow to move from zero setup to your first approved, traceable intent execution — on the desktop app or via the local API.</p>
         <p class="lead">This is an early activation protocol preview, not the final production onboarding sequence.</p>
       </section>
 
@@ -55,14 +84,29 @@
           <article class="step">
             <div class="step-index">01</div>
             <div>
-              <h3>Initialize Core Runtime</h3>
-              <p>Start the local orchestration runtime that handles planning, policy, and execution dispatch.</p>
+              <h3>Install the Desktop App</h3>
+              <p>Download the self-contained installer for your platform. No Python, pip, or other prerequisites required — the runtime is fully bundled.</p>
+              <pre class="code-block"># Windows — run the MSI or NSIS installer
+# Linux   — install the DEB or AppImage
+# macOS   — open the DMG and drag to Applications</pre>
+              <p>Or start the backend server directly for headless or API-only use:</p>
               <pre class="code-block">curl -sL get.machina.os | bash</pre>
             </div>
           </article>
 
           <article class="step">
             <div class="step-index">02</div>
+            <div>
+              <h3>Connect Your LLM Provider</h3>
+              <p>Open Settings and choose from seven providers. Ollama runs fully local on your machine; OpenAI, Gemini, Claude, OpenRouter, and LM Studio require an API key.</p>
+              <pre class="code-block"># Example: point to a local Ollama instance
+Base URL: http://localhost:11434
+Model:    llama3</pre>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-index">03</div>
             <div>
               <h3>Map Workspace Context</h3>
               <p>
@@ -73,7 +117,7 @@
           </article>
 
           <article class="step">
-            <div class="step-index">03</div>
+            <div class="step-index">04</div>
             <div>
               <h3>Sync Operator Identity</h3>
               <p>Apply your policy profile for approval gates, execution limits, and logging requirements.</p>
@@ -85,7 +129,7 @@
 
       <section class="cta reveal">
         <h3>Complete sync</h3>
-        <p class="lead">When setup is done, run your first goal and review plan preview, approvals, tool outputs, and timeline.</p>
+        <p class="lead">When setup is done, run your first goal and review plan preview, approvals, tool outputs, and timeline. Try the guided tour in demo mode for a curated walkthrough.</p>
         <pre class="code-block">machina run "Prepare my development environment for Project X"</pre>
       </section>
     </main>

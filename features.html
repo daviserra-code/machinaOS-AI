@@ -8,13 +8,33 @@
       name="description"
       content="Explore how MachinaOS converts intent into validated execution using planning, policy gates, approvals, tool adapters, and event timelines."
     />
-    <link rel="canonical" href="https://machinaos.ai/features" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MachinaOS Features | Planning, Policy, Execution" />
+    <meta property="og:description" content="Neural indexing, contextual exploration, multi-agent delegation, policy enforcement, and human approval gates for local AI workflows." />
+    <meta property="og:url" content="https://machinaos.ai/features.html" />
+    <meta property="og:site_name" content="MachinaOS" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MachinaOS Features | Planning, Policy, Execution" />
+    <meta name="twitter:description" content="Governed AI execution with planning, policy gates, and human approval." />
+    <link rel="canonical" href="https://machinaos.ai/features.html" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://machinaos.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "Features", "item": "https://machinaos.ai/features.html"}
+      ]
+    }
+    </script>
     <link rel="stylesheet" href="assets/styles.css?v=2" />
   </head>
   <body>
     <header class="topbar">
       <div class="site-wrap topbar-inner">
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy">Machina<span>OS</span></span></a>
+        <a class="brand" href="index.html"><span class="brand-copy">Machina<span>OS</span></span></a>
         <nav class="nav-links" aria-label="Primary">
           <a data-nav href="index.html">Home</a>
           <a data-nav href="screens.html">Screens</a>
@@ -44,28 +64,183 @@
 
     <main class="site-wrap">
       <section class="section reveal">
-        <span class="kicker">Protocol v4</span>
+        <span class="kicker">Sprint 60 — 2,148 Tests Passing</span>
         <h1>Neural <strong>Architecture</strong></h1>
-        <p class="lead">A layered runtime where intent intake, planning, policy, execution, and tool adapters are separated for reliability.</p>
+        <p class="lead">A layered runtime where intent intake, planning, policy, execution, and tool adapters are separated for reliability — now shipping as a native desktop application.</p>
       </section>
 
       <section class="section reveal">
+        <div class="section-head"><span>Core Runtime</span></div>
         <div class="card-grid">
           <article class="card col-6">
             <h3>Neural Indexing</h3>
-            <p>Indexes active workspace state so plans can reference real files, tools, and recent execution history.</p>
+            <p>Indexes active workspace state so plans can reference real files, tools, and recent execution history before any action is proposed.</p>
           </article>
           <article class="card col-6">
             <h3>Contextual Explorer</h3>
-            <p>Cross-file and semantic lookup feed the planner with concrete evidence before any action is proposed.</p>
+            <p>Cross-file semantic lookup feeds the planner with concrete evidence. Dynamic tool-name routing detects registered tools in natural-language queries.</p>
           </article>
           <article class="card col-6">
             <h3>Agent Command Center</h3>
-            <p>Delegates subtasks to specialized agents with scoped permissions, approval requirements, and fallback behavior.</p>
+            <p>Delegates subtasks to specialized agents with scoped permissions, approval requirements, capability scoring, fallback strategies, and five orchestration modes.</p>
           </article>
           <article class="card col-6">
             <h3>Neural Vault</h3>
-            <p>Maintains local-first memory partitions and execution logs so the operator can audit what happened and why.</p>
+            <p>Maintains local-first memory partitions, per-agent memory isolation, and execution logs so operators can audit what happened and reproduce any run.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><span>Desktop Application</span></div>
+        <div class="card-grid">
+          <article class="card col-8">
+            <h3>Native Desktop Shell — Windows, Linux, macOS</h3>
+            <p>Tauri 2-based desktop app ships as a self-contained installer (MSI / NSIS / DEB / AppImage / DMG) with bundled Python runtime and all dependencies. Zero prerequisites on the target machine. Frameless glassmorphic window with custom titlebar, minimize/maximize/close controls, and system-tray hide-to-background support.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Auto-Updater</h3>
+            <p>Built-in updater plugin checks GitHub Releases on startup, displays an install banner, and applies updates with a single click — no manual download required.</p>
+          </article>
+          <article class="card col-6">
+            <h3>16 Integrated Views</h3>
+            <p>Chat, Tools, Explorer, Processes, Agents, Studio, Metrics, Events, Settings, Security, MCP, and more — all accessible via keyboard shortcuts Ctrl+1–9 and a fuzzy Command Palette (Ctrl+K).</p>
+          </article>
+          <article class="card col-6">
+            <h3>System Status Bar</h3>
+            <p>Persistent bottom bar shows LLM connection state, agent fleet health, active task count, memory usage, and GitHub connection status — refreshed every 30 seconds.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><span>Visual Workflow Studio</span></div>
+        <div class="card-grid">
+          <article class="card col-8">
+            <h3>Drag-and-Drop Pipeline Canvas</h3>
+            <p>Build multi-agent pipelines visually on an SVG canvas with a grid background. Drag tools and agents from a searchable palette, reposition nodes freely, connect output ports to input ports with cubic Bezier edges, and load any of 35+ built-in chain templates directly onto the canvas.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Smart Argument Builder</h3>
+            <p>Per-tool argument schemas replace raw JSON with structured form fields — text, number, textarea, checkbox, and select — covering 30+ tools with placeholder text, required indicators, and inline hints.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Live Debug Execution</h3>
+            <p>SSE-streaming step-by-step execution overlays each canvas node with real-time state: amber pulsing (running), green glow with ✓ badge (success), red glow with ✗ badge (failed), and dimmed ⊘ badge (skipped).</p>
+          </article>
+          <article class="card col-4">
+            <h3>Auto-Assign and Optimize</h3>
+            <p>One-click pipeline negotiation assigns the best-scoring agent to each step by capability confidence. The optimizer detects data-flow dependencies and annotates steps with parallel execution groups.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Chain Versioning and Rollback</h3>
+            <p>Every workflow update snapshots the previous version. Roll back to any prior configuration, compare version history, and republish — all without leaving the Studio view.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><span>Security Center</span></div>
+        <div class="card-grid">
+          <article class="card col-6">
+            <h3>Encrypted Secrets Vault</h3>
+            <p>AES-256-GCM encryption with PBKDF2 key derivation (600k iterations) and per-secret nonces. Falls back to XOR+HMAC when the cryptography package is unavailable. Store and retrieve credentials without ever writing them to disk in plain text.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Immutable Audit Log</h3>
+            <p>SOC 2-compatible append-only audit trail with SHA-256 hash chains. Query by date, export as JSON, verify chain integrity, and review summaries from the Security Center panel.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Vulnerability Scanner</h3>
+            <p>14 built-in patterns covering SQL injection, XSS, SSRF, command injection, path traversal, hardcoded secrets, insecure deserialization, JWT issues, and eval/exec — each finding tagged with a CWE ID and severity level.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Credential Scrubber</h3>
+            <p>20+ regex patterns strip OpenAI, GitHub, GitLab, Slack, Google, AWS, and Azure keys; JWTs; bearer tokens; private keys; and connection strings from tool outputs before they reach the log or UI.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><span>Agent Orchestration</span></div>
+        <div class="card-grid">
+          <article class="card col-4">
+            <h3>Five Orchestration Strategies</h3>
+            <p>Single, Round-Robin, Capability Score, Fallback, and Pipeline — selectable per-workflow with configurable consensus thresholds and min-voter requirements.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Capability and Reputation Learning</h3>
+            <p>Every tool execution records success rate, latency, and error counts per agent. Reputation scores blend 60% recent with 40% lifetime outcomes, weighting selection toward proven performers.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Agent Health and Auto-Healing</h3>
+            <p>Rolling health records track consecutive failures, recovery thresholds, and degradation onset. A 60-second background sweeper auto-heals DEGRADED or OFFLINE agents and reroutes in-flight tasks.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Consensus and Negotiation</h3>
+            <p>Multi-agent consensus gates risky tool calls (Majority, Unanimous, Weighted). Multi-round proposal/counter/accept lifecycle with auto-counter heuristics and priority-based resolution.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Delegation Chains and Cycle Detection</h3>
+            <p>Scoped delegation with max-depth-5 guards and cycle detection prevents runaway chains. Chain history is visualized with depth indicators directly in the Agents view.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Task Handoffs and Queues</h3>
+            <p>Formal handoff lifecycle (REQUESTED → EXECUTING → COMPLETED/DECLINED) with preconditions and constraints. Priority-sorted task queue with auto-execution, batch drain, and broadcast timeout sweeper.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><span>LLM and Tool Connectivity</span></div>
+        <div class="card-grid">
+          <article class="card col-6">
+            <h3>7 LLM Providers</h3>
+            <p>Ollama (local), OpenAI, Google Gemini, Anthropic Claude, OpenRouter, LM Studio — each with provider-specific headers, split connect/read timeouts, and diagnostic error messages distinguishing connection refusal, timeout, and auth failure. Hot-reconfigure without restart.</p>
+          </article>
+          <article class="card col-6">
+            <h3>MCP Protocol Bridge</h3>
+            <p>Connect any Model Context Protocol server via JSON-RPC 2.0 stdio transport. Capabilities are translated to <code>mcp.&lt;server&gt;.&lt;tool&gt;</code>-namespaced entries in the tool registry, with MEDIUM-risk defaults and SQLite-backed server registry.</p>
+          </article>
+          <article class="card col-6">
+            <h3>GitHub Integration</h3>
+            <p>Dedicated PAT-based GitHub connection panel, independent of the LLM provider. Validates against <code>api.github.com/user</code>, shows username and connection status dot in the system bar, and persists token in preferences.</p>
+          </article>
+          <article class="card col-6">
+            <h3>New Tool Registry (Sprint 58)</h3>
+            <p><code>filesystem.copy</code>, <code>filesystem.mkdir</code>, <code>git.tag</code>, <code>git.merge</code>, and <code>system.env</code> added — with workspace-bounded path safety, overwrite guards, and automatic sensitive-key redaction on env reads.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><span>Template Library</span></div>
+        <div class="card-grid">
+          <article class="card col-4">
+            <h3>35 Chain Templates</h3>
+            <p>Ready-to-run workflow blueprints: code-review-deep, debug-investigation, security-deep-scan, hotfix-workflow, pr-readiness-check, changelog-generation, performance-profile, git-hygiene, license-compliance, and 26 more.</p>
+          </article>
+          <article class="card col-4">
+            <h3>21 Agent Templates</h3>
+            <p>Preconfigured agent blueprints with scoped tool-filters: code-reviewer, devops, security-auditor, release-manager, debugger, test-engineer, documentation-writer, ci-cd-specialist, frontend-analyst, sre-agent, and more.</p>
+          </article>
+          <article class="card col-4">
+            <h3>24 Workflow DSL Templates</h3>
+            <p>Concise intent-to-step recipes: quick-commit, branch-and-start, full-project-audit, security-sweep, debug-workflow, release-cut, hotfix, feature-start, and 16 others — load any into the Studio or run directly.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><span>Observability and CI/CD</span></div>
+        <div class="card-grid">
+          <article class="card col-6">
+            <h3>Metrics Dashboard and Event Inspector</h3>
+            <p>Plan success rate, average step count, execution duration, and event count displayed as cards and SVG bar charts. Filterable event stream by type, source, and severity with pagination and newest-first ordering.</p>
+          </article>
+          <article class="card col-6">
+            <h3>GitHub Actions CI/CD Pipeline</h3>
+            <p>Automated cross-platform release builds for Windows (MSI+NSIS), Linux (DEB+AppImage), and macOS (DMG x64+arm64) triggered on version tags. Ruff lint, Rust fmt, and cargo check on every push. Auto-generated update manifest uploaded as a draft release asset.</p>
           </article>
         </div>
       </section>

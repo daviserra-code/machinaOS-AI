@@ -8,13 +8,94 @@
       name="description"
       content="MachinaOS is a local-first orchestration layer that converts natural language goals into validated plans, policy checks, and real tool execution on your machine."
     />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MachinaOS | Local-First AI Orchestration" />
+    <meta property="og:description" content="Intent-native runtime for governed AI agent workflows. Local-first, traceable, human-approved." />
+    <meta property="og:url" content="https://machinaos.ai/" />
+    <meta property="og:site_name" content="MachinaOS" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MachinaOS | Local-First AI Orchestration" />
+    <meta name="twitter:description" content="Intent-native runtime for governed AI agent workflows." />
     <link rel="canonical" href="https://machinaos.ai/" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": "https://machinaos.ai/#organization",
+      "name": "MachinaOS",
+      "url": "https://machinaos.ai",
+      "description": "Local-first intent runtime for governed AI agent orchestration",
+      "foundingDate": "2025",
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Machina Intelligence",
+        "url": "https://machina-intelligence.com"
+      },
+      "contactPoint": [
+        {"@type": "ContactPoint", "email": "info@machinaos.ai", "contactType": "customer support"},
+        {"@type": "ContactPoint", "email": "sales@machina-intelligence.com", "contactType": "sales"}
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "@id": "https://machinaos.ai/#software",
+      "name": "MachinaOS",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "description": "Intent-native AI orchestration layer for local-first, governed multi-agent workflows with visual pipeline studio, security center, and 7 LLM provider support",
+      "url": "https://machinaos.ai",
+      "softwareVersion": "0.2",
+      "featureList": "https://machinaos.ai/features.html",
+      "screenshot": "https://machinaos.ai/screens.html",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Free",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/PreOrder",
+          "description": "Single local runtime, core tool registry, session memory, demo mode"
+        },
+        {
+          "@type": "Offer",
+          "name": "Intelligence",
+          "price": "49",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/PreOrder",
+          "description": "Multi-agent delegation, consensus flows, Visual Workflow Studio, Security Center, MCP protocol, 7 LLM providers, native desktop app"
+        },
+        {
+          "@type": "Offer",
+          "name": "Enterprise",
+          "availability": "https://schema.org/PreOrder",
+          "description": "Distributed agent mesh, security policy templates, org-wide observability, CI/CD integration"
+        }
+      ],
+      "publisher": {"@id": "https://machinaos.ai/#organization"}
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://machinaos.ai/#website",
+      "name": "MachinaOS",
+      "url": "https://machinaos.ai",
+      "publisher": {"@id": "https://machinaos.ai/#organization"},
+      "inLanguage": "en"
+    }
+    </script>
     <link rel="stylesheet" href="assets/styles.css?v=2" />
   </head>
   <body>
     <header class="topbar">
       <div class="site-wrap topbar-inner">
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy">Machina<span>OS</span></span></a>
+        <a class="brand" href="index.html"><span class="brand-copy">Machina<span>OS</span></span></a>
         <nav class="nav-links" aria-label="Primary">
           <a data-nav href="index.html">Home</a>
           <a data-nav href="screens.html">Screens</a>
@@ -73,15 +154,27 @@
           </article>
           <article class="card col-8">
             <h3>Planner and Executor Split</h3>
-            <p>The planner proposes steps and assigned tools, then the executor runs only approved actions with policy constraints.</p>
+            <p>The planner proposes steps and assigns tools; the executor runs only approved actions with policy constraints and full event tracing.</p>
           </article>
           <article class="card col-8">
             <h3>Delegation and Multi-Agent Runtime</h3>
-            <p>Specialized agents can handle subtasks with tool-scoped permissions, handoff rules, and explicit execution traces.</p>
+            <p>Specialized agents handle subtasks with tool-scoped permissions, capability scoring, health monitoring, auto-healing, and explicit execution traces.</p>
           </article>
           <article class="card col-4">
-            <h3>Memory Layers</h3>
-            <p>Session and preference memory keep context stable across runs without hiding state from the operator.</p>
+            <h3>Memory and Secrets Layers</h3>
+            <p>Session, preference, and per-agent memory keep context stable. AES-256-GCM encrypted secrets vault keeps credentials off disk in plain text.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Visual Workflow Studio</h3>
+            <p>Drag-and-drop canvas to build, connect, and execute multi-agent pipelines visually — with live debug execution and per-node status overlays.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Security Center</h3>
+            <p>Built-in vulnerability scanner, SOC 2-style immutable audit log with hash chains, credential scrubber, and secrets vault in one panel.</p>
+          </article>
+          <article class="card col-4">
+            <h3>MCP Protocol Bridge</h3>
+            <p>Connect any Model Context Protocol server via JSON-RPC 2.0 stdio transport, auto-registering its tools into the execution registry.</p>
           </article>
         </div>
       </section>
@@ -101,7 +194,19 @@
           </article>
           <article class="card col-4">
             <h3>Turn routines into reusable workflows</h3>
-            <p>Capture repeatable engineering tasks as inspectable AI-native execution chains.</p>
+            <p>Capture repeatable engineering tasks as inspectable AI-native execution chains with 35+ built-in templates.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Run from your desktop</h3>
+            <p>Native Windows, Linux, and macOS app with bundled Python runtime — no prerequisites, no cloud dependency, installs in one click.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Stay secure by default</h3>
+            <p>AES-256-GCM encrypted secrets vault, automated credential scrubbing from outputs, and a tamper-evident audit log built into every execution.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Build visually, ship reliably</h3>
+            <p>Design multi-agent pipelines on a visual canvas, assign agents automatically, optimize for parallelism, and debug step-by-step with live feedback.</p>
           </article>
         </div>
       </section>
@@ -128,23 +233,27 @@
         <div class="section-head"><span>System Snapshot</span></div>
         <div class="stat-row">
           <div class="stat">
-            <strong>3 Stages</strong>
-            <span>Core, Shell, OS Layer roadmap</span>
+            <strong>2,148 Tests</strong>
+            <span>Verified across 60 completed sprints</span>
+          </div>
+          <div class="stat">
+            <strong>7 LLM Providers</strong>
+            <span>Ollama, OpenAI, Gemini, Claude, OpenRouter, LM Studio</span>
           </div>
           <div class="stat">
             <strong>Local-First</strong>
-            <span>Plans, logs, and task state</span>
+            <span>Plans, secrets, logs, and agents on your machine</span>
           </div>
           <div class="stat">
-            <strong>12 Max</strong>
-            <span>Validated steps per execution plan</span>
+            <strong>35+ Templates</strong>
+            <span>Chain, agent, and workflow DSL blueprints</span>
           </div>
         </div>
       </section>
 
       <section class="cta reveal">
         <h3>Ready to evolve your workflow?</h3>
-        <p class="lead">Run a practical intent-to-action loop with plan previews, approvals, tool outputs, and traceable results.</p>
+        <p class="lead">Run a practical intent-to-action loop with plan previews, approvals, tool outputs, and traceable results — on your machine, with your data.</p>
         <a class="btn btn-primary" href="pricing.html">View Pricing Preview</a>
       </section>
     </main>

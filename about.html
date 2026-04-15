@@ -8,13 +8,33 @@
       name="description"
       content="Learn how MachinaOS adds a semantic runtime above your OS to turn intent into planned, approved, and traceable tool execution."
     />
-    <link rel="canonical" href="https://machinaos.ai/about" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="About MachinaOS | Architecture and Roadmap" />
+    <meta property="og:description" content="Explore MachinaOS's architecture, roadmap, and engineering principles behind local-first, governed AI execution." />
+    <meta property="og:url" content="https://machinaos.ai/about.html" />
+    <meta property="og:site_name" content="MachinaOS" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="About MachinaOS | Architecture and Roadmap" />
+    <meta name="twitter:description" content="Architecture, roadmap, and engineering principles behind local-first AI execution." />
+    <link rel="canonical" href="https://machinaos.ai/about.html" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://machinaos.ai/"},
+        {"@type": "ListItem", "position": 2, "name": "About", "item": "https://machinaos.ai/about.html"}
+      ]
+    }
+    </script>
     <link rel="stylesheet" href="assets/styles.css?v=2" />
   </head>
   <body>
     <header class="topbar">
       <div class="site-wrap topbar-inner">
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span><span class="brand-copy">Machina<span>OS</span></span></a>
+        <a class="brand" href="index.html"><span class="brand-copy">Machina<span>OS</span></span></a>
         <nav class="nav-links" aria-label="Primary">
           <a data-nav href="index.html">Home</a>
           <a data-nav href="screens.html">Screens</a>
@@ -67,16 +87,16 @@
         <div class="section-head"><span>Development Stages</span></div>
         <div class="card-grid">
           <article class="card col-4">
-            <h3>Stage 1: Machina Core</h3>
-            <p>Local orchestrator, planning and execution modules, tool registry, session memory, action logs.</p>
+            <h3>Stage 1: Machina Core ✓</h3>
+            <p>Local orchestrator, planning and execution modules, tool registry, session memory, action logs, multi-agent coordination, security foundation, and MCP protocol support. 2,148 tests across 60 sprints.</p>
           </article>
           <article class="card col-4">
-            <h3>Stage 2: Machina Shell</h3>
-            <p>Command palette, conversation-first control, file and process awareness, permission-aware automation.</p>
+            <h3>Stage 2: Machina Shell ✓</h3>
+            <p>Native desktop application (Windows/Linux/macOS), command palette, visual workflow studio, file explorer, process monitor, 16-panel interface, and system status bar — shipped in Sprint 38–60.</p>
           </article>
           <article class="card col-4">
             <h3>Stage 3: OS Layer</h3>
-            <p>Background services, policy engine, semantic file features, persistent memory, multi-agent coordination.</p>
+            <p>Background services, persistent policy engine, semantic file features, organization-wide observability, and shared agent mesh for team deployments.</p>
           </article>
         </div>
       </section>
@@ -90,15 +110,23 @@
           </article>
           <article class="card col-6">
             <h3>Deterministic logs</h3>
-            <p>All meaningful actions are recorded so runs can be audited, explained, and reproduced.</p>
+            <p>All meaningful actions are recorded so runs can be audited, explained, and reproduced. The immutable audit log uses SHA-256 hash chains to detect tampering.</p>
           </article>
           <article class="card col-6">
             <h3>Human approval for risk</h3>
-            <p>Destructive or high-impact actions trigger policy checks and require explicit confirmation.</p>
+            <p>Destructive or high-impact actions trigger policy checks and require explicit confirmation. Consensus workflows gate sensitive tool calls across multiple agents.</p>
           </article>
           <article class="card col-6">
             <h3>No AI theater</h3>
             <p>Avoid vague claims. Ship practical capabilities with clear constraints and reversible mutations.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Inspectability over opacity</h3>
+            <p>Every plan, step, tool result, event, and agent message is accessible and searchable. Nothing useful happens invisibly.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Local-first by default</h3>
+            <p>Plans, secrets, logs, agent definitions, and workflow chains all live on your machine. Cloud services are opt-in LLM providers, not infrastructure dependencies.</p>
           </article>
         </div>
       </section>
