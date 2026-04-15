@@ -1,23 +1,15 @@
 server {
     listen 80;
     listen [::]:80;
-    server_name machinaos.ai;
+    server_name machinaos.ai www.machinaos.ai;
     access_log /var/log/nginx/machinaos.access.log combined;
-    return 301 https://www.machinaos.ai$request_uri;
-}
-
-server {
-    listen 80;
-    listen [::]:80;
-    server_name www.machinaos.ai;
-    access_log /var/log/nginx/machinaos.access.log combined;
-    return 301 https://www.machinaos.ai$request_uri;
+    return 301 https://machinaos.ai$request_uri;
 }
 
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name machinaos.ai;
+    server_name www.machinaos.ai;
     access_log /var/log/nginx/machinaos.access.log combined;
 
     ssl_certificate /etc/letsencrypt/live/machinaos.ai/fullchain.pem;
@@ -25,17 +17,28 @@ server {
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
-    return 301 https://www.machinaos.ai$request_uri;
+    return 301 https://machinaos.ai$request_uri;
 }
 
 server {
     listen 443 ssl http2 default_server;
     listen [::]:443 ssl http2 default_server;
-    server_name www.machinaos.ai;
+    server_name machinaos.ai;
     access_log /var/log/nginx/machinaos.access.log combined;
 
     root /var/www/machinaos;
     index index.html;
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # SEO: redirect /index.html to / to avoid duplicate content
+    location = /index.html {
+        return 301 https://machinaos.ai/;
+    }
 
     location = /ops-console-8c7f43d1.html {
         auth_basic "MachinaOS Private Analytics";
@@ -54,7 +57,7 @@ server {
     }
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/index.html =404;
     }
 
     ssl_certificate /etc/letsencrypt/live/machinaos.ai/fullchain.pem;

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://machinaos.ai/</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <!-- Core product pages -->
+  <url>
+    <loc>https://machinaos.ai/features.html</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <url>
+    <loc>https://machinaos.ai/user-stories.html</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <!-- Company -->
+  <url>
+    <loc>https://machinaos.ai/about.html</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <!-- Supporting content -->
+  <url>
+    <loc>https://machinaos.ai/demo-guide.html</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <url>
+    <loc>https://machinaos.ai/screens.html</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <url>
+    <loc>https://machinaos.ai/contact.html</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <url>
+    <loc>https://machinaos.ai/links.html</loc>
+    <lastmod>2026-03-31</lastmod>
+  </url>
+
+  <!--
+    EXCLUDED: /pricing.html
+    Reason: page is labeled "placeholder" with ~200 words of thin content.
+    Add back once real pricing tiers and content are published.
+    Also recommended: add <meta name="robots" content="noindex"> to pricing.html
+    until it is ready.
+  -->
+
+  <!--
+    NOTE: /index.html is intentionally omitted.
+    The canonical URL for the homepage is https://machinaos.ai/ (no filename).
+    Implement a 301 redirect from /index.html to / at the server level.
+  -->
+
+</urlset>

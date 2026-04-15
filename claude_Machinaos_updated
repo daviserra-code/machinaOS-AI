@@ -1,0 +1,1661 @@
+# CLAUDE.md
+
+## Project
+**Machina OS** — an AI-native operating environment built in iterative layers, starting from a local agentic desktop orchestrator and evolving toward a deeply integrated operating shell.
+
+## Mission
+Machina OS should behave like an operating system that understands user intent, plans actions, invokes tools, manages memory, and executes workflows safely on the local machine.
+
+The first goal is **not** to build a real kernel.  
+The first goal is to build a **credible AI-native operating layer** on top of an existing OS.
+
+---
+
+## Product Vision
+Machina OS is an **intent-driven system**.
+
+Instead of forcing the user to manually open tools and coordinate steps, Machina OS should:
+- understand goals
+- decompose them into tasks
+- choose tools
+- execute steps
+- ask for confirmation only when risk is non-trivial
+- keep track of context, preferences, and outcomes
+
+Example:
+> “Prepare my development environment for Project X.”
+
+Expected behavior:
+1. Locate the repo
+2. Open the workspace
+3. Start required services
+4. Restore recent context
+5. Present a concise status summary
+
+---
+
+## Current Development Strategy
+Build Machina OS in 3 stages.
+
+### Stage 1 — Machina Core
+A local agent orchestrator that can:
+- receive natural-language commands
+- plan tasks
+- call tools
+- maintain short-term memory
+- log actions
+- run on top of Windows/Linux/macOS
+
+### Stage 2 — Machina Shell
+A system shell / workspace interface with:
+- command palette
+- conversational task execution
+- file and process awareness
+- permission-aware automation
+- visual task timeline
+
+### Stage 3 — Machina OS Layer
+Deeper integration with:
+- background services
+- policy engine
+- semantic filesystem features
+- persistent memory
+- multi-agent coordination
+- optional custom desktop environment
+
+---
+
+## Non-Goals
+For the MVP, do **not** attempt:
+- custom kernel development
+- custom drivers
+- full desktop environment replacement
+- uncontrolled autonomous behavior
+- broad cloud dependency
+- “general intelligence” claims
+
+Stay brutally practical.
+
+---
+
+## Engineering Principles
+1. **Local-first where possible**  
+   User files, task state, memory, and orchestration should run locally by default.
+
+2. **Explicit tool boundaries**  
+   The model must never “pretend” to perform an action.  
+   Every action must map to a real tool invocation.
+
+3. **Human approval for risky actions**  
+   Destructive file ops, command execution, network actions, credential use, and process killing require policy checks.
+
+4. **Deterministic logs**  
+   Every meaningful action must be logged in a structured way.
+
+5. **Planner / executor separation**  
+   Planning and execution should be distinct modules.
+
+6. **Composable memory**  
+   Memory should be layered: session, episodic, semantic, preferences.
+
+7. **Graceful degradation**  
+   If the model is unavailable, the system should still expose logs, state, tools, and recoverable workflows.
+
+8. **No fake magic**  
+   Avoid vague AI theater. Build inspectable behavior.
+
+9. **Reversibility**  
+   Mutations should be reversible. File writes back up originals. Git operations expose diff previews. Rollback should be possible.
+
+---
+
+## Technical Stack (Actual)
+
+### Backend
+- Python 3.14+
+- FastAPI for local APIs (port 8100)
+- Pydantic for schemas
+- Uvicorn for local service runtime
+- httpx for async HTTP to LLM providers
+
+### Agent / Orchestration
+- Custom planner → executor pipeline (no LangGraph)
+- Unified runtime stack: contracts → guards → emitter → runtime store → TaskRuntime → StepRuntime → RuntimeExecutor
+- Heuristic-first intent routing: run(), chat(), chat_stream() prefer heuristic parser for deterministic intents before LLM fallback
+- Dynamic tool-name routing: registry-populated _tool_registry_names set enables dot-notation detection (system.info, filesystem.list, etc.) with prefix-to-intent mapping and filesystem sub-intent refinement
+- LLM intent guardrail: _query_has_tool_signal() last-resort check prevents LLM from hijacking queries containing registered tool names
+- Human-readable output formatting: _format_system_output() for system tools, _format_dict_output() for generic dicts
+- Hybrid planning: deterministic templates for known intents, LLM for open-ended
+- Deterministic intents: list, read_file, write_file, delete_file, run_command, git_command, list_processes, analyze_repository, dev_workflow, system_info, grep, create_project, cleanup, find_and_read, semantic_search, workflow, refactor, debug_issue, delegate
+- Plan validator: schema enforcement, step limits (12 max), auto-fix
+- Tool registry with typed schemas, risk levels, output schemas, and execution limits
+- Tool Protocol compliance: structured error codes, path safety, privilege escalation blocking
+- LLM-assisted intake parsing + plan generation
+- Path normalization: 'current directory' and similar phrases auto-resolved to '.'
+- Dual LLM provider support: Ollama (default) and OpenAI-compatible (Groq, etc.)
+- Multi-LLM provider expansion: 7 providers — Ollama, OpenAI, Gemini, Claude, OpenRouter, LM Studio, GitHub Copilot (GitHub Copilot decoupled from UI dropdown into standalone GitHub Connection panel)
+- _OPENAI_COMPAT_PROVIDERS set: OpenAI, OpenRouter, LM Studio, GitHub Copilot share /v1/chat/completions endpoint
+- Provider auto-detection: _detect_provider() recognizes URLs for all 7 providers
+- Provider-specific headers: OpenRouter (HTTP-Referer, X-Title), GitHub Copilot (Editor-Version), Claude (x-api-key, anthropic-version)
+- Environment variables: `MACHINA_LLM_PROVIDER`, `MACHINA_LLM_URL`, `MACHINA_LLM_MODEL`, `MACHINA_LLM_API_KEY`
+
+### Multi-Agent Coordination
+- AgentDefinition: capability profile with name, description, capabilities, tool_filter (fnmatch globs), system_prompt, enabled flag
+- BUILTIN_AGENTS: filesystem (filesystem.*), git (git.*), shell (shell.*/process.*), system (system.*)
+- AgentPool: register/unregister/find agents by capability, intent, or tool name; strategy-aware selection
+- AgentBus: inter-agent pub/sub messaging with send, broadcast, subscribe (by agent/type/all), capped history
+- AgentMessage: Pydantic model with source_agent, target_agent, message_type, payload, correlation_id, task_id
+- PlanStep.delegate_to: optional agent_id for scoped tool execution
+- RuntimeExecutor delegation check: AGENT_TOOL_DENIED error if agent rejects tool, delegation events on agent bus
+- RuntimeExecutor fallback delegation: when FALLBACK strategy active, tries candidates_for_tool() before failing
+- RuntimeExecutor pipeline execution: run_pipeline() chains agents sequentially with output passing
+- Intake detection: "delegate to", "ask agent", "use agent", "send to agent" patterns
+- Planner: deterministic _plan_delegate() with agent pool resolution, routes to agent-specific tools
+- Planner: decompose_for_agents() decomposes complex intents into agent-scoped sub-plans
+- Agent-aware LLM planner: agent catalog injected into system prompt, delegate_to parsed from LLM output
+- Agent-aware chat prompts: available agents listed in conversational system prompts
+
+### Agent Persistence
+- AgentStore: SQLite-backed CRUD persistence (agents.db) for user-created agents
+- ChainStore: SQLite-backed CRUD persistence (chains.db) for workflow chains — survives server restarts
+- AgentPool store integration: register/unregister auto-persist non-builtin agents, load persisted agents on init
+- AgentBus chain store integration: create/update/rollback/delete auto-persist chains, load persisted chains on init
+- Builtin isolation: _builtin_ids set prevents builtin agents from being written to store
+- DelegationChain: cycle detection and depth limiting (max_depth=5) for agent-to-agent delegation
+- AgentBus.delegate(): validated delegation with cycle/depth checks before sending delegation_request messages
+- RuntimeExecutor chain validation: creates/validates DelegationChain per step, DELEGATION_CYCLE error on violation
+
+### Consensus Decision Making
+- ConsensusStrategy(str, Enum): MAJORITY, UNANIMOUS, WEIGHTED
+- VoteValue(str, Enum): APPROVE, REJECT, ABSTAIN
+- ConsensusStatus(str, Enum): PENDING, RESOLVED, REJECTED, EXPIRED
+- ConsensusRequest model: question, candidates, votes, strategy, min_voters, resolution logic
+- Vote model: agent_id, value, weight, reason, cast_at
+- AgentBus.request_consensus(): create consensus request, notify candidates via bus
+- AgentBus.cast_vote(): record agent votes with weight and reason, emit consensus_vote events
+- AgentBus.resolve_consensus(): evaluate votes per strategy, emit consensus_resolved events
+- OrchestrationConfig: consensus_strategy and consensus_min_voters fields
+- API: POST /consensus, GET /consensus, GET /consensus/{id}, POST /consensus/{id}/vote, POST /consensus/{id}/resolve
+- UI: Consensus panel in Agents view with create form, vote buttons, resolve controls
+
+### Agent Memory Scoping
+- MemoryStore 'agent' scope: per-agent namespaced memory partitions (agent_id:key pattern)
+- set_agent_memory(), get_agent_memory(), delete_agent_memory(), list_agent_keys(), clear_agent_memory()
+- Agent memory isolation: different agents' memory independent, clearing one doesn't affect others
+- API: GET/PUT/DELETE /agents/{id}/memory, DELETE /agents/{id}/memory (clear all)
+- UI: Agent Memory section with agent selector, key-value viewer, delete controls
+
+### Delegation Chain Visualization
+- API: GET /agents/delegation-chains returns active chain paths, depth, max_depth
+- UI: Delegation Chains section showing chain paths with agent flow arrows, depth indicators
+
+### Agent-to-Agent Negotiation
+- NegotiationPhase(str, Enum): PROPOSED, COUNTERED, ACCEPTED, REJECTED, RESOLVED, FAILED, WITHDRAWN
+- NegotiationPriority(int, Enum): CRITICAL=1, HIGH=2, NORMAL=3, LOW=4
+- NegotiationProposal model: initiator, responder, tool, step_id, task_id, phase, priority, reason, counter_reason, proposed_agent, counter_agent, max_rounds (1-10, default 3), current_round, winner
+- Proposal lifecycle: propose() → counter() (multi-round) → accept()/reject()/withdraw(), resolve_by_priority() (lower priority value wins, tie→initiator)
+- is_terminal property: True for ACCEPTED, REJECTED, RESOLVED, FAILED, WITHDRAWN
+- AgentBus negotiation methods: start_negotiation, counter_negotiation, accept_negotiation, reject_negotiation, resolve_negotiation_by_priority, get_negotiation, list_negotiations
+- Negotiation events: negotiation_proposed, negotiation_countered, negotiation_accepted, negotiation_rejected, negotiation_resolved emitted on agent bus
+- API: POST/GET /negotiations, GET /negotiations/{id}, POST /negotiations/{id}/counter, /accept, /reject, /resolve
+- UI: Negotiations panel with create form, priority selector, counter/accept/reject/auto-resolve buttons, phase-colored badges
+
+### Consensus-Aware Executor
+- RuntimeExecutor.consensus_tool_patterns: fnmatch glob patterns identifying tools requiring multi-agent consensus
+- RuntimeExecutor.run_step_with_consensus(): gates tool execution on consensus when tool matches patterns and >=2 candidate agents exist
+- Auto-voting: each candidate agent votes based on capability confidence (>=0.3 → APPROVE weighted by confidence, <0.3 → REJECT weighted by 1-confidence)
+- Consensus resolution: RESOLVED → proceed with run_step(), REJECTED → CONSENSUS_REJECTED error code
+- Fallback: skips consensus when no patterns configured, single agent, or no bus/pool
+
+### Capability Learning
+- CapabilityScore model: agent_id, tool, successes, failures, total_duration_ms, last_error_code, error_counts dict
+- record_success(duration_ms), record_failure(error_code, duration_ms) methods
+- Confidence formula: success_rate * min(1.0, sample_size / 20), neutral prior 0.5 when no data
+- RuntimeExecutor._record_capability(): persists CapabilityScore to agent memory after each tool execution
+- RuntimeExecutor._get_capability_confidence(): retrieves confidence from memory store
+- RuntimeExecutor.get_agent_capabilities(): returns all capability scores for an agent
+- API: GET /agents/{agent_id}/capabilities
+- UI: Capability Learning panel with agent selector, table showing tool/success_rate/confidence/avg_duration/samples/last_error
+
+### Agent Reputation
+- AgentReputation model: agent_id, total_successes, total_failures, total_tasks, total_duration_ms, tools_used dict (tool→count), recent_outcomes list (last 50)
+- Properties: sample_size, success_rate, recent_success_rate (recent window only), reputation_score (weighted blend: 40% lifetime + 60% recent × sample_confidence)
+- record(tool, success, duration_ms), record_task() methods
+- RuntimeExecutor._record_capability() also records AgentReputation to agent memory after each delegated tool execution
+- RuntimeExecutor.get_agent_reputation(): returns cross-task reputation dict (score, rates, tools_used, sample_size)
+- API: GET /agents/{agent_id}/reputation
+- UI: Agent Reputation panel with agent selector, reputation/success cards, tools used badges
+
+### Consensus Pattern Learning
+- ConsensusPatternScore model: pattern, approvals, rejections, updated_at
+- Properties: total, approval_rate, should_skip_consensus (True if total >= 10 and approval_rate > 0.95)
+- record_outcome(approved) method
+- AgentBus: record_consensus_outcome(), get_consensus_pattern(), list_consensus_patterns(), should_skip_consensus()
+- RuntimeExecutor.run_step_with_consensus(): dynamic skip when pattern has high enough approval rate
+- RuntimeExecutor: records consensus outcome after resolution for pattern learning
+- API: GET /consensus/patterns, GET /consensus/patterns/{tool}
+- UI: Consensus Patterns table with tool pattern, approvals/rejections, approval rate, auto-skip indicator
+
+### Negotiation Auto-Counter
+- suggest_counter_agents(): ranks alternative agents by capability confidence, excludes proposed agent
+- AgentBus.auto_counter(): picks best alternative via suggest_counter_agents(), submits counter-proposal, broadcasts negotiation_auto_countered event
+- API: POST /negotiations/{negotiation_id}/auto-counter
+- UI: Auto-Counter button on active negotiation cards
+
+### Task Handoff Protocol
+- HandoffStatus(str, Enum): REQUESTED, ACCEPTED, DECLINED, EXECUTING, COMPLETED, FAILED, CANCELLED
+- HandoffRequest model: handoff_id (auto "ho_" prefix), from_agent, to_agent, tool, step_id, task_id, status, preconditions (list), constraints (dict), reason, decline_reason, created_at, resolved_at
+- Lifecycle methods: accept(), decline(reason), start_execution(), complete(), fail(reason), cancel()
+- is_terminal property: True for DECLINED, COMPLETED, FAILED, CANCELLED
+- AgentBus: request_handoff, accept_handoff, decline_handoff, complete_handoff, fail_handoff, cancel_handoff, get_handoff, list_handoffs (with agent_id/task_id/active_only filters)
+- Events: handoff_requested, handoff_accepted, handoff_declined, handoff_completed, handoff_failed, handoff_cancelled
+- API: POST/GET /handoffs, GET /handoffs/{id}, POST /handoffs/{id}/accept, /decline, /complete, /cancel
+- UI: Handoffs panel with create form, status cards, accept/decline/complete/cancel buttons
+
+### Agent Health Monitoring
+- AgentHealthStatus(str, Enum): ONLINE, DEGRADED, OFFLINE
+- AgentHealthRecord model: agent_id, status, consecutive_failures/successes, total_checks, avg_latency_ms, recent_latencies (rolling window), last_error, degraded_since, offline_since
+- record_check(): update health metrics and auto-evaluate status (error streak → DEGRADED → OFFLINE, recovery → ONLINE)
+- Latency degradation detection: recent latency > baseline × factor triggers DEGRADED
+- AgentBus: record_health_check, get_agent_health, list_agent_health, set_agent_status (manual override)
+- Events: agent_health_changed (emitted on status transitions)
+- API: GET /agents/health, GET /agents/{id}/health, POST /agents/{id}/health/status
+
+### Agent Health Persistence
+- HealthStore: SQLite-backed (health.db) persistence with three tables: health_checks, health_snapshots, performance_trends
+- health_checks table: individual check events (agent_id, success, latency_ms, error, error_code, recorded_at)
+- health_snapshots table: periodic full-record snapshots (status, consecutive_failures/successes, total_checks, avg_latency_ms, snapshot_data JSON)
+- performance_trends table: time-series trend data (reputation_score, success_rate, avg_latency_ms, total_tasks, total_successes, total_failures, health_status)
+- AgentBus auto-persist: record_health_check() writes to health_checks + saves snapshot after each update
+- Snapshot restoration: _load_health_snapshots() restores last-known AgentHealthRecord per agent on startup
+- AgentBus: record_performance_trend(), get_health_checks(), get_health_trends()
+- API: GET /agents/{id}/health/history, GET /agents/{id}/health/trends
+
+### Agent Workflow Chains
+- AgentWorkflowStep model: agent_id, tool, arguments, description, output_key, input_from, condition, branch_to, parallel_group
+- AgentWorkflowStep.condition: optional condition string (format: `output_key:field op value`, ops: `==`, `!=`, `contains`, `not_empty`)
+- AgentWorkflowStep.branch_to: optional agent_id for cross-agent branching when condition fails (re-routes instead of skipping)
+- AgentWorkflowStep.parallel_group: optional group key — steps sharing the same non-empty parallel_group run concurrently via asyncio.gather
+- AgentWorkflowChain model: chain_id, name, description, steps list, agent_sequence property, version, version_history, updated_at
+- AgentWorkflowChain.snapshot(): serialisable state capture with version, name, steps, timestamp
+- AgentWorkflowChain.update_steps(new_steps, description): saves current state to version_history, increments version, replaces steps
+- AgentWorkflowChain.rollback(target_version): reverts to historical state (saves current first), returns True on success
+- AgentBus: create_workflow_chain, get_workflow_chain, list_workflow_chains, delete_workflow_chain, update_workflow_chain, rollback_workflow_chain
+- AgentBus.optimize_chain(): dependency graph analysis via output_key/input_from, topological grouping into parallel execution groups
+- AgentBus.apply_optimization(): applies optimize_chain() results as parallel_group annotations on chain steps
+- AgentBus.auto_assign_chain(): uses negotiate_pipeline to assign best agents to chain steps by capability confidence
+- Events: workflow_chain_created, workflow_chain_deleted, workflow_chain_updated, workflow_chain_rolled_back
+- RuntimeExecutor.run_workflow_chain(): converts chain steps to PlanSteps, registers with StepRuntime, executes sequentially with output bridging, condition evaluation, and cross-agent branching, stops on failure
+- RuntimeExecutor.run_workflow_chain_parallel(): groups steps by parallel_group, runs groups sequentially but concurrent within group via asyncio.gather, falls back to sequential when no groups
+- RuntimeExecutor.schedule_task(): auto-routes task to best agent via AgentPool.best_agent_for_tool(), enqueues on bus, returns {status, agent_id, item_id, confidence}
+- RuntimeExecutor.evaluate_condition(): parses `output_key:field op value` against collected step outputs, supports `==`, `!=`, `contains`, `not_empty`
+- Conditional step gating: steps with unmet conditions are skipped via skip_step() with SKIPPED status, or re-routed via branch_to
+- Cross-agent branching: when condition fails and branch_to is set, step.delegate_to is re-routed to alternate agent instead of skipping
+- Enhanced output bridging: _bridge_step_input() injects `_prior_output` key, resolves path from files/matches/string/list, forwards non-underscore dict keys via setdefault
+- BUILTIN_CHAIN_TEMPLATES: pre-built reusable chain definitions (code-review, deploy-check, project-scan, security-audit, dependency-check, release-readiness, onboarding-scan, log-investigation, cleanup-sweep)
+- AgentBus.create_chain_from_template(): instantiates AgentWorkflowChain from built-in template by name
+- API: POST/GET /workflow-chains, GET/DELETE /workflow-chains/{id}, POST /workflow-chains/{id}/execute, POST /workflow-chains/{id}/execute-debug (SSE step-by-step streaming), PUT /workflow-chains/{id} (versioned update), POST /workflow-chains/{id}/rollback, GET /workflow-chains/{id}/versions, POST /workflow-chains/from-template/{template_id}, GET /workflow-chain-templates, POST /workflow-chains/{id}/negotiate, POST /workflow-chains/{id}/auto-assign, POST /workflow-chains/{id}/optimize, POST /workflow-chains/{id}/apply-optimization
+- UI: Workflow Chains panel with drag-and-drop step editor (description, output_key, input_from, arguments JSON, condition, branch_to, parallel_group fields per step), vertical flow visualization with colored badges, Optimize/Auto-Assign/Negotiate/Execute/Parallel/Rollback/History buttons, template picker
+
+### Agent Broadcast Queries
+- BroadcastQueryStatus(str, Enum): PENDING, COLLECTING, COMPLETED, EXPIRED
+- BroadcastQuery model: query_id (auto "bq_" prefix), from_agent, question, target_agents list, responses dict, status, created_at, completed_at, is_complete property
+- BroadcastQuery lifecycle: add_response(agent_id, payload), complete()
+- AgentBus: broadcast_query(), respond_to_query(), complete_query(), get_query(), list_queries() (with active_only filter)
+- Events: broadcast_query, broadcast_query_response, broadcast_query_completed
+- API: POST/GET /broadcast-queries, GET /broadcast-queries/{id}, POST /broadcast-queries/{id}/respond, POST /broadcast-queries/{id}/complete
+- UI: Broadcast Queries panel with form, query list, status colors, Complete button
+
+### Capability Announcements
+- CapabilityAnnouncement model: announcement_id (auto "cann_" prefix), agent_id, capabilities list, tool_filter list, announced_at
+- AgentBus: announce_capabilities(), list_announcements() (with agent_id filter)
+- Events: capability_announced
+- API: POST/GET /capability-announcements
+- UI: Capability Announcements panel with capability/tool_filter badges
+
+### Chain Execution History
+- ChainExecutionRecord model: execution_id (auto "cex_" prefix), chain_id, chain_name, task_id, started_at, finished_at, status (RUNNING/SUCCESS/PARTIAL/FAILED), step_results list, total_steps, succeeded_steps, failed_steps, skipped_steps
+- ChainExecutionRecord.finish(): computes step counters and final status from results
+- AgentBus: record_chain_execution(), list_chain_executions() (with chain_id filter), get_chain_execution()
+- RuntimeExecutor: run_workflow_chain() auto-records execution via bus after completion
+- Events: chain_execution_recorded
+- API: GET /chain-executions, GET /chain-executions/{id}
+- UI: Chain Execution History panel with status colors, step counts (✓✗⊘)
+
+### Agent Collaboration Sessions
+- CollaborationSession model: session_id (auto "collab_" prefix), task_id, participants list, context dict, created_at, closed_at, is_active property
+- CollaborationSession lifecycle: join(agent_id), leave(agent_id), set_context(key, value), get_context(key, default), close()
+- AgentBus: create_collaboration(), join_collaboration(), leave_collaboration(), set_collaboration_context(), get_collaboration(), close_collaboration(), list_collaborations() (with active_only filter)
+- Events: collaboration_created, collaboration_joined, collaboration_left, collaboration_context_updated, collaboration_closed
+- API: POST/GET /collaborations, GET /collaborations/{id}, POST /collaborations/{id}/join, /leave, /context, /close
+- UI: Collaboration Sessions panel with form, participant list, context key count, Close button
+
+### Agent Request/Response Protocol
+- AgentRequestStatus(str, Enum): PENDING, DELIVERED, RESPONDED, TIMEOUT, FAILED
+- AgentRequest model: request_id (auto "areq_" prefix), from_agent, to_agent, action, payload, correlation_id, task_id, status, timeout_ms, created_at, delivered_at, responded_at
+- AgentRequest lifecycle: deliver(), respond(), timeout(), fail(), is_terminal property
+- AgentResponse model: response_id (auto "aresp_" prefix), request_id, from_agent, to_agent, success, payload, error, created_at
+- AgentBus: send_request(), send_response(), get_request(), get_response_for(), list_requests() (with agent_id/active_only filters)
+- Events: agent_request_sent, agent_response_sent
+- API: POST/GET /agent-requests, GET /agent-requests/{id}, POST /agent-requests/{id}/respond
+- UI: Agent Requests panel with from/to/action form, status-colored request list, respond button
+
+### Pipeline Capability Negotiation
+- PipelineNegotiationResult model: negotiation_id (auto "pneg_" prefix), chain_id, assignments list (step_index, tool, agent_id, confidence, source), conflicts list (step_index, tool, tied_agents, confidence), created_at
+- AgentBus.negotiate_pipeline(chain, pool): scores candidates by capability confidence per step, detects ties as conflicts, returns PipelineNegotiationResult
+- AgentBus._get_agent_tool_confidence(): retrieves capability confidence from memory (default 0.5)
+- Events: pipeline_negotiated
+- API: POST /workflow-chains/{id}/negotiate, POST /workflow-chains/negotiate-all (bulk across all chains)
+- UI: Inline negotiation results with assignments and conflict display
+- Negotiation timeline: GET /negotiations/{id}/timeline returns round-by-round history (proposed → countered → accepted/resolved) with phase-colored vertical timeline view
+
+### Agent Communications Dashboard
+- Communications feed: GET /agents/communications/feed returns unified timeline of requests, responses, negotiations, handoffs, broadcasts, and collaborations (newest first, configurable limit)
+- Communication graph: GET /agents/communications/graph returns nodes (agents) and edges (messages) for SVG visualization with circular layout, color-coded directed edges (cyan=request, amber=negotiation, purple=handoff, emerald=broadcast), edge aggregation
+- Activity feed: unified feed merging all inter-agent event types with Material icons, status badges, type filter dropdown
+- UI: 6th agent sub-tab (Communications) with stats cards (messages, negotiations, pending requests, collaborations), SVG communication graph, activity feed, negotiation timeline viewer
+
+### Pipeline Lane View
+- Horizontal agent lanes with draggable steps grouped by delegate_to agent, color-coded per agent
+- HTML5 drag-and-drop between agent lanes for cross-agent step reassignment with visual ring feedback
+- Optimistic UI update with API persistence via PUT /workflow-chains/{id} (version increment)
+- Negotiate All button: POST /workflow-chains/negotiate-all runs pipeline negotiation across all chains, returns assignments and conflicts per chain
+- UI: Pipeline Lane View panel with chain selector dropdown, agent lanes, step badges (output_key, input_from, condition)
+- Lane Builder: "New from Lanes" mode with tool palette (filter, drag), dynamic agent lane creation, drop zones, submit to create workflow chain
+- Visual pipeline construction: drag tools from palette into agent lanes, agent selector per lane, chain name/description inputs
+
+### Conflict Resolution
+- POST /workflow-chains/{id}/resolve-conflicts: applies user-chosen agents for tied steps via resolutions list
+- Interactive conflict picker: negotiateChain() shows radio buttons for each tied agent per conflict step
+- Inline Resolve Conflicts button persists selections via versioned chain update
+
+### Message Threading
+- GET /agent-messages/threads: groups messages by correlation_id into conversation threads
+- Thread model: thread_id, correlation_id, messages (sorted), message_count, participants, types, first_ts, last_ts
+- Solo messages (no correlation_id) grouped individually with _solo_ prefix
+- Flat/Threads toggle: switchable views in Agent Message Log
+- Collapsible thread cards: correlation_id header, message count badge, participant list, expand/collapse
+- Correlation_id display: flat view shows purple 🔗 correlation_id link for threaded messages
+
+### Chain Execution Replay
+- ChainReplayRequest model: replay_id (auto "crep_" prefix), source_execution_id, chain_id, chain_name, override_arguments dict, result_execution_id
+- AgentBus: request_chain_replay(), get_chain_replay(), list_chain_replays(), complete_chain_replay()
+- RuntimeExecutor.replay_workflow_chain(): looks up source execution, re-creates chain, applies argument overrides, runs via run_workflow_chain(), links replay to result
+- Events: chain_replay_requested, chain_replay_completed
+- API: POST /chain-executions/{id}/replay, GET /chain-replays, GET /chain-replays/{id}
+- UI: Replay button on chain execution cards
+
+### Broadcast Response Aggregation
+- AggregationStrategy(str, Enum): MERGE, FIRST, MAJORITY, ALL
+- BroadcastAggregation model: aggregation_id (auto "bagg_" prefix), query_id, strategy, result, response_count
+- AgentBus.aggregate_broadcast(): aggregates completed query responses per strategy (ALL=dict, FIRST=first value, MERGE=merged dict, MAJORITY=most common)
+- AgentBus.expire_broadcast_query(): marks COLLECTING queries as EXPIRED with timestamp
+- Events: broadcast_aggregated, broadcast_query_expired
+- API: POST /broadcast-queries/{id}/aggregate, POST /broadcast-queries/{id}/expire
+- UI: Aggregate button (COMPLETED/EXPIRED queries) with inline result display, Expire button (COLLECTING queries)
+
+### Agent Task Queue
+- AgentTaskStatus(str, Enum): QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED
+- AgentTaskItem model: item_id (auto "atq_" prefix), agent_id, tool, arguments, priority (1-5), status, result, error, is_terminal property
+- AgentTaskItem lifecycle: start(), complete(result), fail(error), cancel()
+- AgentBus: enqueue_task() (priority-sorted), dequeue_task() (highest priority first), complete_task_item(), fail_task_item(), cancel_task_item(), list_agent_tasks() (with active_only filter), get_task_item()
+- Events: agent_task_enqueued, agent_task_dequeued, agent_task_completed, agent_task_failed, agent_task_cancelled
+- API: POST/GET /agent-tasks, GET /agent-tasks/{id}, POST /agent-tasks/dequeue/{agent_id}, POST /agent-tasks/{id}/complete, /fail, /cancel
+- UI: Agent Task Queue panel with enqueue form (agent/tool/priority), task list with status colors, Dequeue/Complete/Cancel buttons
+
+### Agent Task Queue Auto-Execution
+- RuntimeExecutor.auto_execute_task(item_id): dequeues task item, invokes tool via registry, completes/fails item, returns result dict
+- RuntimeExecutor.auto_execute_agent_queue(agent_id): drains all QUEUED tasks for agent, executes each in priority order, returns list of results
+- API: POST /agent-tasks/{id}/auto-execute, POST /agent-tasks/auto-execute-queue/{agent_id}
+- UI: ⚡ Auto-Execute button on QUEUED task items, Auto-Execute All button for batch processing
+
+### Broadcast Query Timeout
+- BroadcastQuery.timeout_ms: configurable timeout in milliseconds (0 = no timeout)
+- BroadcastQuery.is_overdue: property returns True when query is not terminal and elapsed time exceeds timeout_ms
+- AgentBus.broadcast_query(): accepts timeout_ms keyword argument
+- AgentBus.expire_overdue_queries(): sweeps all queries, expires any that are overdue, returns list of expired
+- MachinaCore._broadcast_sweeper: ScheduledTask (30s interval) that calls _sweep_broadcast_timeouts()
+- API: POST /broadcast-queries/with-timeout
+- UI: Timeout input field on broadcast query form, timeout badge on query cards
+
+### Agent Capability Discovery
+- DiscoveredCapability model: agent_id, tool, source ("filter" or "history"), confidence, last_seen
+- RuntimeExecutor.discover_capabilities(): expands tool_filter globs against registry + merges execution history from memory
+- API: GET /agents/{id}/capabilities/discovered
+- UI: Capability Discovery panel with agent selector, tool/source/confidence table
+
+### Agent Performance Dashboard
+- RuntimeExecutor.get_agent_performance(): combined health, reputation, capabilities, discovered capabilities, trends
+- Performance trend recording: _record_capability() records time-series trend data (reputation_score, success_rate, avg_latency_ms, health_status) after each delegated execution
+- API: GET /agents/{id}/performance, GET /agents/performance/comparison
+- UI: Performance Dashboard comparing all agents with reputation score, success rate, latency metric cards
+- UI: Performance Trends panel with agent selector, 3-card summary (Score, Success%, Latency), SVG time-series line chart (dual lines: amber=score, green=success rate)
+- UI: Health History panel with agent selector, check log showing success/failure dots, latency, errors
+
+### Agent Orchestration
+- OrchestrationStrategy(str, Enum): SINGLE, ROUND_ROBIN, CAPABILITY_SCORE, FALLBACK, PIPELINE
+- OrchestrationConfig(BaseModel): strategy, max_fallback_attempts (1-10, default 3), pipeline_pass_output (bool)
+- score_agent_for_tool(): specificity scoring — exact match=1.0, prefix glob=0.3+specificity, open=0.1
+- AgentPool.candidates_for_tool(): all matching agents sorted by specificity score, health-aware (OFFLINE excluded, DEGRADED deprioritized)
+- AgentPool.select_agent(): strategy-aware selection (SINGLE/ROUND_ROBIN/CAPABILITY_SCORE/FALLBACK/PIPELINE)
+- AgentPool.best_agent_for_tool(): selects agent with highest capability confidence from memory, falls back to specificity scoring
+- AgentPool.agent_bus: optional AgentBus reference for health-aware routing
+- MachinaCore.orchestration: property to get/set orchestration config
+- API: GET/PUT /orchestration for strategy configuration
+- API: GET /agents/summary (total, online, degraded, offline counts + top performer)
+- AgentPool lifecycle events: agent_registered/agent_unregistered emitted on bus during register/unregister
+- Auto-healing scheduler: ScheduledTask (60s interval) sweeps agent health, finds DEGRADED/OFFLINE agents, probes tool_filter patterns, triggers auto_heal()
+- UI: Orchestration strategy panel in Agents view with strategy selector, fallback attempts, pipeline toggle
+- UI: Agent status bar showing fleet health summary (online/degraded/offline counts + top performer)
+
+### Memory
+- SQLite (WAL mode) for events (`events.db`), task history (`memory.db`), telemetry (`telemetry.db`), workflow chains (`chains.db`)
+- JSONL logs for event streams (dual-write alongside SQLite)
+- Explicit memory classes: session, task, project, preferences, agent — each with clear persistence rules
+- File-based artifacts in `.machina/` directory
+
+### RAG / Semantic Search
+- ChromaDB (optional, local-first) for vector storage and semantic similarity search
+- VectorStore wrapper with graceful degradation when chromadb is not installed
+- SemanticIndexer: file chunking (800 chars, 200 overlap), content-hash deduplication, skip filters
+- Explicit indexing via API endpoints (POST /rag/index) — no auto-indexing during run()
+- RAG-augmented chat: relevant code snippets injected into conversational LLM context
+- Lazy initialization: ChromaDB client created on first RAG access, not at startup
+- Collections per workspace: `ws_<workspace_id>` with cosine similarity HNSW space
+
+### Policy & Permissions
+- Risk-level based policy engine (CRITICAL → block, HIGH → approval, MEDIUM → approval, LOW → allow)
+- Capability-based permission model with scoped grants per tool
+- Capability scopes: filesystem.read/write/delete, shell.execute, process.read/control, network.access, git.read/write, browser.open/search
+- Configurable profiles: DEFAULT_GRANTS (all caps), READONLY_GRANTS (read-only)
+- Hierarchical capabilities: granting `filesystem` covers all `filesystem.*` sub-caps
+
+### Security
+- EncryptionStore: AES-256-GCM encrypted secret store with PBKDF2 key derivation (600k iterations), SQLite-backed, per-secret nonces
+- Graceful fallback: XOR+HMAC authenticated encryption when `cryptography` package unavailable
+- CredentialScrubber: 20+ regex patterns for API keys (OpenAI, GitHub, GitLab, Slack, Google, AWS, Azure), JWTs, bearer tokens, private keys, connection strings
+- Custom pattern/literal registration for project-specific secrets
+- Module-level scrub_text() and scrub_output() convenience functions for logs/events/API responses
+- AuditLog: SOC 2-compatible immutable audit log with SHA-256 hash chains (each entry includes hash of previous for tamper detection)
+- AuditEntry model: audit_id, timestamp, actor, action, resource, outcome, detail, risk_level, chain_hash
+- Query/count/verify_chain/export_json/summary for compliance reporting
+- SecurityAnalyzer: 14 vulnerability patterns covering SQL injection, XSS, SSRF, command injection, JWT issues, hardcoded secrets, path traversal, insecure deserialization, eval/exec
+- SecurityFinding model with CWE IDs, severity levels (CRITICAL/HIGH/MEDIUM/LOW/INFO)
+- API: POST/GET/DELETE /security/secrets, POST /security/analyze, GET /security/audit (with filters), GET /security/audit/summary, GET /security/audit/verify, GET /security/audit/export, POST /security/scrub
+
+### MCP Protocol
+- MCPClient: JSON-RPC 2.0 client with stdio transport (subprocess), initialize handshake (protocol version 2024-11-05)
+- Protocol methods: list_tools, call_tool, list_resources, read_resource, list_prompts, get_prompt
+- MCPToolBridge: converts MCP tool definitions to Machina ToolSpec format, registers with `mcp.<server>.<tool>` namespace
+- MCP→ToolSpec conversion: inputSchema properties → params dict, MEDIUM risk, async-to-sync handler wrapper
+- MCPServerRegistry: SQLite-backed CRUD for MCP server configurations (server_id, name, transport, command, args, env, url, enabled, auto_connect)
+- API: GET/POST /mcp/servers, DELETE /mcp/servers/{id}, POST /mcp/servers/{id}/connect, POST /mcp/servers/{id}/disconnect, GET /mcp/tools
+
+### Failure Recovery
+- Error classification: transient, permanent, permission, not_found
+- Configurable retry with exponential backoff for transient errors
+- Partial plan recovery: plans with mixed success/failure continue to completion
+- Fallback tools per step
+- Rollback coordinator: steps with rollback_hint get auto-rollback on failure
+- Coordinated plan rollback via `rollback_plan()` — reverses succeeded steps in order
+
+### Telemetry
+- SQLite-backed telemetry store (telemetry.db)
+- Plan-level metrics: success rate, avg step count, avg duration, retry count
+- Tool-level metrics: invocation count, success rate, avg/min/max latency, error class
+- API endpoints: `/metrics`, `/metrics/errors`
+
+### Conversation
+- Multi-turn conversation sessions with SQLite persistence (conversations.db)
+- Context-aware intent parsing and plan generation (conversation history injected)
+- Session auto-summary: older messages compressed via LLM when turn count exceeds threshold
+- Conversational vs task routing: greetings/questions handled without tool execution
+- Stale session cleanup: purge_stale(max_age_days, min_messages) removes old/empty sessions
+
+### LLM Routing
+- Multi-LLM router with capability-based routing (general, fast, planning, conversation, coding)
+- Priority-ordered fallback: if preferred provider fails, next route is tried automatically
+- Routes support chat, chat_stream, and generate operations
+
+### UI
+- Tailwind CSS single-page app served from FastAPI static files
+- Glassmorphic "stitch" design with 15 views: Home, Chat, Tools, Memory, Workflows, Studio, Agents, Timeline, Explorer, Processes, Metrics, Events, Settings, Security, MCP
+- SSE streaming for real-time event updates + WebSocket for live event push
+- Approval prompts via `/approve/{plan_id}/{step_index}` API
+- Multi-turn conversational chat with streaming token display
+- Memory browser: scopes, preferences, workspaces, sessions
+- Workflow composer: visual CRUD for user-defined multi-step workflows
+- Notification system: toast popups + bell badge + notification panel
+- Agent manager: CRUD for custom agents, capability/tool_filter editing, agent message log
+- Keyboard UX: Enter to send, Escape to clear, Up/Down arrow for input history, Ctrl+L to focus chat, Ctrl+1-9 for view switching (15 views), Alt+N for new chat
+- Command Palette: Ctrl+K fuzzy search across views, tools, quick actions; keyboard navigation (arrows, Enter, Escape); unmatched queries sent to chat
+- File Explorer: directory browsing with breadcrumb navigation, go-up, file preview (100KB cap), file-type icons
+- Process Monitor: sortable table (PID, Name, Status, CPU%, Memory), search filter, stop process with confirmation
+- System Status Bar: persistent bottom bar showing workspace hostname, active tasks, agent fleet status, memory usage (30s polling)
+- Smart suggestions: context-aware follow-up actions after task completion
+- Error explanation: LLM-powered error analysis with inline explain buttons on failed steps
+- Rollback/retry UI: inline retry and explain buttons on failed plan steps
+- Pipeline wizard: drag-and-drop workflow chain step editor with agent/tool dropdowns (populated from API), description/output_key/input_from/arguments/condition/branch_to/parallel_group fields, HTML5 drag reordering, auto-assign agents button, vertical flow visualization with colored badges
+- Communications dashboard: 6th agent sub-tab with stats cards, SVG communication graph (circular layout, color-coded edges), unified activity feed with type filter, negotiation timeline viewer
+- Pipeline lane view: horizontal agent lanes with draggable steps, cross-agent reassignment via drag-and-drop, optimistic UI with API persistence, Negotiate All button for bulk pipeline negotiation
+- Conflict resolution picker: inline radio buttons for tied agent selection per conflict step, Resolve Conflicts button with versioned chain update
+- Lane builder: visual pipeline construction from scratch with tool palette (filter + drag), dynamic agent lanes, create chain from lane contents
+- Message threading: Flat/Threads toggle in Agent Message Log, collapsible thread cards grouped by correlation_id, participant list, message count badges
+- Home dashboard: system health cards (Memory, LLM Provider, Agent Fleet, Tools), contextual event feed sidebar, workspace context panel, live data from /system/status + /agents/summary + /llm/status + /events/query + /workspaces
+- Workflow Studio: visual node-based workflow composer (14th view) with three-panel layout (palette, SVG canvas, properties), HTML5 drag-drop from tool/agent/template palette, node positioning via mouse, port-to-port edge drawing with cubic Bezier SVG, topological sort serialization (Kahn's algorithm), bidirectional chain↔studio loading, Save/Execute/Debug/Auto-Assign/Optimize/Open operations, Delete key removes selected node
+- Studio UX: smart argument builder (replaces raw JSON with typed form fields per tool), tooltip icons (ℹ️) on every property field, collapsible inline help guide (5 sections), data flow section with clickable input_from suggestions, collapsible advanced options, JSON/Form toggle, tool description display
+- Studio Debug Execution: SSE-streaming step-by-step execution with live canvas node visuals (amber pulsing=running, green ✓=success, red ✗=failed, gray ⊘=skipped), incremental results tray, duration metrics per step
+- Studio Open Chain: glassmorphic picker modal with step counts and agent names, loads existing chains into visual editor
+- Security Center: dedicated view with 4 sub-tabs — Secrets Vault (AES-256-GCM encrypt/store/retrieve/delete), Audit Log (SOC 2 query/summary/verify hash chain/export JSON), Vulnerability Scanner (paste code for 14-pattern analysis with CWE IDs and severity badges), Credential Scrubber (20+ regex patterns for API keys/tokens/secrets)
+- MCP Protocol: dedicated view with 2 sub-tabs — Server Registry (register/connect/disconnect/delete MCP servers with stdio/HTTP transport), Discovered Tools (grid of all MCP tools with params, risk levels, server source)
+
+### Desktop Shell (Tauri 2)
+- Tauri 2.x native window wrapping the web UI
+- Rust backend lifecycle manager: auto-spawns Python FastAPI, detects existing backend, clean shutdown
+- Rust-side health polling: raw TCP/HTTP health check (bypasses CORS), navigates webview on success
+- Glassmorphic loading screen: animated orb + status text, Rust thread updates via eval()
+- Frameless window chrome: custom titlebar with drag region, minimize/maximize/close buttons
+- Persistent shell architecture: loading page as iframe host, no page navigation on connect
+- Window controls via __TAURI__ API: withGlobalTauri=true, capabilities for minimize/maximize/hide/drag
+- Project root discovery: walks up from exe location (not CWD) to find pyproject.toml
+- System tray: Show/Quit menu, left-click to focus, close-to-tray behaviour
+- CORS middleware on FastAPI: allows Tauri origins for cross-origin requests
+- Embedded Python distribution: bundle/python/ with CPython 3.12 embeddable + pip + all deps (52 MB)
+- Dual-mode launcher: checks bundle/python/python.exe first (distribution), falls back to system python (dev)
+- Self-contained installers: MSI/NSIS include Tauri exe + embedded Python + source (zero prerequisites)
+- Bundle script: scripts/bundle_python.py automates download, pip setup, dependency install, source copy
+- Distribution build: scripts/build_dist.ps1 orchestrates bundle + tauri build
+- Project structure: desktop/ with Cargo.toml, tauri.conf.json, package.json, capabilities
+- Dev workflow: `npm run dev` from desktop/ compiles Rust + spawns backend + opens window
+- Auto-updater: tauri-plugin-updater v2, background update check 10s after UI loads, GitHub Releases endpoint (configurable), webview banner notification with Install & Restart / Later buttons
+
+### Workspace Intelligence
+- Workspace model with language/framework detection, key file discovery
+- Directory indexing: walks tree, detects languages by extension, frameworks by marker files
+- Workspace auto-indexing: run() auto-indexes workspace on first encounter, caches in memory + SQLite
+- Workspace context in LLM planner: detected languages/frameworks injected into planner system prompt
+- Workspace context in chat: conversational replies include workspace languages, frameworks, key files
+- Workspace persistence via SQLite (workspaces.db)
+- Preferences engine: typed preferences with defaults, backed by MemoryStore
+
+### Agent Personality
+- PersonalityProfile model: tone, verbosity, emoji, greeting, custom system_instructions
+- Personality-aware system prompts: profile fragment injected into all LLM conversational calls
+- 4 built-in presets: default (professional), casual, minimal, detailed
+- Persistence via PreferencesEngine (survives restarts)
+- UI personality tab: preset selector, individual field controls, custom instructions editor
+- API: GET/PUT /personality, GET /personality/presets, PUT /personality/preset/{name}
+
+### Workflow Composition DSL
+- WorkflowDefinition model: named, reusable multi-step workflow chains with trigger patterns
+- WorkflowStep: mirrors PlanStep shape (tool, arguments, output_key, input_from, fallback, timeout, rollback_hint)
+- Variable substitution: `{{var}}` placeholders in step arguments resolved at runtime from entities/bindings
+- Trigger matching: case-insensitive substring matching against user input
+- WorkflowStore: SQLite-backed CRUD persistence (workflows.db) with enabled/disabled toggle
+- Planner integration: user workflows checked before `_plan_general` fallback, produces workflow-v1 plans
+- Intake detection: "run workflow X", "execute workflow X", "workflow X" heuristic parsing
+- Compound expansion: refactor (tree→git→diagnostics→diff→summary) and debug_issue (diagnostics→git→grep→summary) templates
+- API: GET/POST /workflows, GET/PUT/DELETE /workflows/{id}
+- UI: Workflow Composer view with visual step editor, trigger/variable configuration, enable/disable toggle
+
+### Demo Mode
+- DemoMode enum: INTERNAL (full access), REVIEWER (write but non-destructive), DEMO (read-only)
+- MACHINA_MODE env var + preferences persistence for mode selection
+- Tool gating: ToolRegistry.set_allowed_tools() / is_tool_gated() / DEMO_TOOL_BLOCKED error code
+- DEMO_SAFE_TOOLS: 17 read-only tools (filesystem.list, git.status, system.info, etc.)
+- REVIEWER_EXTRA_TOOLS: 14 write-but-safe tools (filesystem.write_file, git.commit, etc.)
+- BLOCKED_TOOLS: 6 dangerous tools always blocked in non-internal modes (process.stop, shell.run, etc.)
+- DemoSessionManager: TTL-based session lifecycle (default 30 min), create/get/touch/expire_stale
+- DemoTelemetry: in-memory event collector with filters (session_id, event_type), summary, max cap
+- Output sanitization: sanitize_output() strips home dirs, usernames, Windows drive letters from tool outputs
+- Reviewer auth: HMAC-SHA256 token generation/verification via MACHINA_REVIEWER_SECRET env var
+- Seed workspace: 12-file "Acme Web Platform" sample project (auth handler, users API, tests, config)
+- Guided tour: 9-step tooltip tour system targeting UI elements (Neural Link, Tools, Explorer, etc.)
+- Quick prompts: 8 curated demo prompts with icons and categories from /demo/guided-prompts
+- Landing page: hero section with orb animation, trust strip, 6-card capabilities grid, tour CTA
+- Orientation overlay: welcome modal explaining key features and read-only restrictions
+- Simplified nav: DEMO_NAV_VIEWS restricts visible views in demo mode
+- Demo sweeper: ScheduledTask (60s) expires stale demo sessions
+- Docker deployment: Dockerfile + docker-compose.yml with MACHINA_MODE=demo, Ollama host passthrough
+- API: GET /demo/status, PUT /demo/mode, POST /demo/reset, POST /demo/seed, GET /demo/telemetry, GET /demo/sessions, GET /demo/guided-prompts
+- UI: demo badge, reset button, quick prompts bar, landing page view, orientation overlay, guided tour
+
+### Background Execution
+- BackgroundRunner: async task queue with configurable concurrency (max_concurrent=3)
+- ScheduledTask: recurring tasks with configurable intervals
+- ServiceWatchdog: health check registry with degradation detection
+- Agent health sweeper: ScheduledTask (60s) in MachinaCore, sweeps DEGRADED/OFFLINE agents and auto-heals via AgentBus\n- Capability discovery sweeper: ScheduledTask (90s) in MachinaCore, discovers capabilities for all agents
+
+### Tool Protocol
+- Structured error codes: every tool failure returns error_code + message (FILE_NOT_FOUND, PERMISSION_DENIED, TIMEOUT, etc.)
+- Output schemas: ToolSpec includes typed output schema for every tool
+- Execution limits: max execution time (120s), max output size (1 MB), hard timeout per invocation
+- Path safety: filesystem tools split read/write validation; reads allowed in system directories (C:\Program Files, etc.), writes/deletes blocked; workspace boundary enforcement for mutations
+- Shell safety: privilege escalation blocking (sudo, runas, doas, pkexec, etc.), destructive command detection
+- shell.run_safe: restricted read-only variant blocking write, delete, install, network operations
+
+### System Integration (Implemented)
+- Filesystem adapter: list, read, write, move, delete, tree, search, grep, semantic_search (9 tools with path safety)
+- Filesystem reversibility: write_file backs up existing files as .machina_bak before overwriting
+- Shell runner: shell.run (HIGH risk) + shell.run_safe (MEDIUM risk, read-only)
+- Process manager: list, info, start, stop (OS-level, no psutil)
+- Browser automation: open_url, search_files, find_recent
+- Git adapter: status, log, diff, checkout, clone, branch, pull, push, commit, stash (10 tools)
+- VS Code integration: open_workspace, open_file, list_extensions, install_extension, run_task, diff, read_diagnostics
+- System introspection: system.status, system.info, system.memory, system.disk (4 tools, stdlib-only)
+- Process visibility: GET /processes endpoint returns live OS process list
+
+---
+
+## Repository Structure
+```text
+machina-os/
+  apps/
+    api/              # FastAPI server, endpoints, startup
+    ui/               # Tailwind SPA (index.html)
+  core/
+    agent/            # Top-level orchestrator (core.py), intent intake (intake.py)
+    planner/          # Plan generation, validation, deterministic templates
+    executor/         # Step-by-step execution with retry and failure recovery
+    memory/           # SQLite-backed layered key-value store + task history
+    policy/           # Risk assessment, approval engine, capability permissions
+    tools/            # Tool registry with typed specs, execution limits, structured errors
+    events/           # Event bus + emitter (canonical event factory)
+    contracts/        # Canonical enums, prefixed IDs, runtime snapshot model
+    guards/           # Task, step, approval transition guards
+    runtime/          # RuntimeStore (hybrid JSONL+SQLite) + TaskRuntime + StepRuntime + RuntimeExecutor
+    llm/              # LLM client with Ollama + OpenAI provider adapters + multi-LLM router
+    conversation/     # ConversationSession model + SQLite store
+    demo/             # Demo mode: DemoMode enum, tool gating, seed workspace, sanitize, telemetry, auth
+    workspace/        # Workspace model, directory indexer, SQLite store
+    telemetry/        # Execution metrics: plan/tool success rates, latency
+    rag/              # ChromaDB vector store + semantic indexer (optional)
+    personality/      # Agent personality profiles and response style
+    workflow/         # Workflow DSL: user-defined workflow chains + SQLite store
+    agents/           # Multi-agent coordination: AgentDefinition, AgentPool, AgentBus, AgentStore, DelegationChain, AgentHealthRecord, AgentWorkflowChain
+    security/         # AES-256-GCM encryption, credential scrubber, SOC 2 audit log, vulnerability analyzer
+    mcp/              # MCP JSON-RPC 2.0 client, tool bridge, server registry
+    schemas.py        # Shared Pydantic models (ToolSpec, PlanStep, RiskLevel, etc.)
+  integrations/
+    filesystem/       # 9 filesystem tools with path safety, rollback, and semantic search
+    shell/            # Shell command runner (shell.run + shell.run_safe)
+    process/          # Process list/info/start/stop
+    browser/          # URL opener, file search, recent files
+    git/              # status, log, diff, checkout, clone, branch
+    vscode/           # VS Code CLI integration (7 tools)
+    system/           # System introspection (system.status, info, memory, disk)
+  tests/              # 2148 pytest tests
+  desktop/            # Tauri 2 desktop shell (Rust + loading screen)
+  scripts/            # bundle_python.py, build_dist.ps1 (distribution tooling)
+```
+
+---
+
+## Core Modules
+
+### 1. Intent Intake
+Transforms raw user input into:
+- intent
+- entities
+- constraints
+- ambiguity markers
+- risk level estimate
+
+### 2. Planner
+Creates an execution plan as structured steps.
+
+A plan step should include:
+- id
+- description
+- tool
+- arguments
+- requires_approval
+- timeout (per-step override)
+- rollback_hint (tool for undo on failure)
+- expected_output
+- fallback strategy
+
+Validation enforced:
+- max 15 steps per plan
+- only registered tools allowed
+- required params must be present
+- high-risk tools force requires_approval=true
+- oversized arguments truncated
+- invalid fallback tools cleared
+- deterministic templates for known intents bypass LLM
+
+### 3. Executor
+Runs the plan step-by-step, captures outputs, handles failures, and updates state.
+
+Failure recovery:
+- error classification (transient, permanent, permission, not_found)
+- configurable retry with backoff for transient errors
+- partial plan recovery — succeeding steps continue after failures
+- fallback tool execution on step failure
+
+### 4. Policy Engine
+Determines whether actions:
+- are safe to auto-run
+- require approval
+- are blocked
+- need sandboxing
+
+Capability scopes:
+- `filesystem.read`, `filesystem.write`, `filesystem.delete`
+- `shell.execute`
+- `process.read`, `process.control`
+- `network.access`
+- `git.read`, `git.write`
+- `browser.open`, `browser.search`
+
+### 5. Memory
+Explicit memory classes with clear persistence rules:
+- session — ephemeral, cleared on reset
+- task — per-task context, linked to plan_id
+- project — persists across sessions
+- preferences — global user settings, never auto-cleared
+- agent — per-agent namespaced partitions (agent_id:key pattern)
+- telemetry — system metrics (separate store)
+
+### 6. Event Bus
+Emit structured events such as:
+- plan_created
+- tool_started
+- tool_finished
+- tool_failed
+- approval_requested
+- task_completed
+
+---
+
+## Tool Design Rules
+Each tool must:
+- do one clear thing
+- expose typed inputs
+- return structured outputs
+- report errors clearly
+- avoid hidden side effects
+
+Implemented tools:
+- `filesystem.list`, `filesystem.read_file`, `filesystem.write_file`, `filesystem.move`, `filesystem.delete`, `filesystem.tree`, `filesystem.search`, `filesystem.grep`, `filesystem.semantic_search`
+- `shell.run`, `shell.run_safe`
+- `process.list`, `process.info`, `process.start`, `process.stop`
+- `browser.open_url`, `browser.search_files`, `browser.find_recent`
+- `git.status`, `git.log`, `git.diff`, `git.checkout`, `git.clone`, `git.branch`, `git.pull`, `git.push`, `git.commit`, `git.stash`
+- `vscode.open_workspace`, `vscode.open_file`, `vscode.list_extensions`, `vscode.install_extension`, `vscode.run_task`, `vscode.diff`, `vscode.read_diagnostics`
+- `system.status`, `system.info`, `system.memory`, `system.disk`
+
+Tool outputs should be machine-readable first, human-readable second.
+
+---
+
+## Safety Rules
+Never allow silent execution of:
+- recursive deletes
+- force-overwrites
+- arbitrary remote downloads
+- credential exfiltration
+- privilege escalation
+- destructive shell pipelines
+- background persistence without explicit consent
+
+High-risk actions must trigger:
+1. human-readable explanation
+2. exact command or effect preview
+3. confirmation path
+4. audit log entry
+
+---
+
+## UX Rules
+Machina OS should feel:
+- calm
+- competent
+- transparent
+- fast
+- reversible
+- reversible
+
+Avoid:
+- overexplaining routine actions
+- anthropomorphic fluff
+- false confidence
+- hidden background activity
+
+Preferred behavior:
+- summarize plan briefly
+- show progress live
+- surface decisions
+- offer rollback when possible
+
+---
+
+## MVP Definition
+A version is considered MVP when it can reliably do the following on a local machine:
+
+1. Accept a natural language request
+2. Produce a structured plan
+3. Execute safe filesystem and shell tasks
+4. Ask approval for risky steps
+5. Log all actions
+6. Restore recent task context
+7. Open and coordinate a coding workspace in VS Code
+
+Example MVP commands:
+- “Open my MES training workspace”
+- “Summarize this project folder”
+- “Create a Python app skeleton with tests”
+- “Prepare the repo and run the dev server”
+- “Find the last report I edited and open it”
+
+---
+
+## Definition of Done
+A feature is done only if:
+- code exists
+- tests exist
+- logs are emitted
+- failure modes are handled
+- user-visible behavior is understandable
+- dangerous cases are constrained
+
+---
+
+## Coding Guidelines
+- Prefer simple modules over clever abstractions
+- Type everything important
+- Validate all tool inputs
+- Keep model prompts versioned
+- Store schemas centrally
+- Write tests for planners, policies, and tool adapters
+- Favor boring technology over fragile wizardry
+
+---
+
+## Prompting Guidelines for Agent Components
+When implementing prompts:
+- require structured outputs
+- forbid pretending to have executed tools
+- require the model to mark uncertainty
+- require the model to separate observations from decisions
+- require the model to ask for approval only when policy requires it
+
+The model should never claim:
+- a file was changed unless a tool changed it
+- a command ran unless execution output exists
+- a repo was updated unless the git tool confirms it
+
+---
+
+## VS Code Integration Goals
+Machina OS should integrate with VS Code to:
+- open workspaces
+- inspect files
+- generate code scaffolds
+- run tasks
+- read diagnostics
+- assist debugging
+- maintain project-level memory
+
+Eventually, VS Code can act as the primary cockpit for Machina during development.
+
+---
+
+## Build Order
+
+### Machina Seed (Complete ✓)
+1. ✅ Local API skeleton — FastAPI on port 8100
+2. ✅ Tool registry — typed specs, risk levels, invoke by name
+3. ✅ Filesystem tools — list, read, write, move, delete, tree, search
+4. ✅ Shell runner with policy checks — command execution + risk gating
+5. ✅ Planner/executor loop — intent → plan → step-by-step execution
+6. ✅ Structured event log — JSONL + SQLite dual persistence
+7. ✅ Chat UI — glassmorphic SPA with SSE streaming
+8. ✅ VS Code workspace integration — placeholder registered
+9. ✅ Session memory — layered key-value store
+10. ✅ Project memory — SQLite-backed with resume support
+
+### Post-Seed Features (Complete ✓)
+11. ✅ LLM integration — Ollama + OpenAI/Groq dual provider
+12. ✅ LLM-powered intake parsing and plan generation
+13. ✅ Approval queue with human-in-the-loop flow
+14. ✅ SSE real-time event streaming
+15. ✅ Project resume from last known state
+16. ✅ SQLite persistence for events and task history
+17. ✅ Visual task timeline in UI
+18. ✅ Process manager adapter (4 tools)
+19. ✅ Browser automation adapter (3 tools)
+
+### Audit-Driven Hardening (Complete ✓)
+20. ✅ Plan validator — schema enforcement, step limits, auto-fix
+21. ✅ Executor failure recovery — error classification, retry, partial recovery
+22. ✅ Capability-based permission model — scoped grants per tool
+23. ✅ Telemetry subsystem — plan/tool metrics, success rates, latency tracking
+24. ✅ Deterministic planning templates — hybrid planner, dev workflow canonical path
+25. ✅ Git adapter — status, log, diff, checkout, clone, branch (6 tools)
+26. ✅ Memory class separation — session, task, project, preferences with clear lifecycle
+
+### Tool Protocol Compliance (Complete ✓)
+27. ✅ Structured error codes — error_code + message on every ToolResult (FILE_NOT_FOUND, PERMISSION_DENIED, TIMEOUT, etc.)
+28. ✅ Output schemas — ToolSpec includes typed output_schema for all tools
+29. ✅ Execution limits — hard timeout (120s), output truncation (1 MB), per-invocation enforcement
+30. ✅ Filesystem path safety — system directory rejection (Win/POSIX), workspace boundary enforcement for writes/deletes
+31. ✅ Shell safety — privilege escalation blocking, destructive command detection
+32. ✅ shell.run_safe — read-only shell variant (MEDIUM risk), blocks write/delete/install/network operations
+33. ✅ filesystem.tree + filesystem.search — 7 filesystem tools now fully implemented
+
+### Architecture Compliance (Complete ✓)
+34. ✅ Schema enhancements — PlanStep.timeout, PlanStep.rollback_hint, Event.severity, Intent.ambiguity_score
+35. ✅ ApprovalRequest model — formal data model with approval_id, plan_id, step_id, reason, preview, risk_level, expires_at
+36. ✅ Rollback coordinator — executor tracks rollback hints, auto-rollback on failure, coordinated plan rollback
+37. ✅ vscode.read_diagnostics — workspace diagnostic tool (pyright, mypy, tsc, eslint)
+38. ✅ 9-step dev_workflow — full canonical sequence: tree → git → open → tasks → diagnostics → summarize
+39. ✅ analyze_repository intent — deterministic template for comprehensive repo analysis (7 steps)
+
+### Runtime Compliance (Complete ✓)
+40. ✅ Task model — Task(task_id, status, goal, workspace_id, intent_id, plan_id, current_step_index, requires_human, last_error, finished_at)
+41. ✅ TaskStatus expansion — 13 states: CREATED, INTAKE_COMPLETE, PLANNED, VALIDATED, WAITING_APPROVAL, READY, EXECUTING, PAUSED, COMPLETED, FAILED, ABORTED, ROLLING_BACK, ROLLED_BACK
+42. ✅ StepStatus expansion — 10 states: PENDING, BLOCKED, WAITING_APPROVAL, READY, RUNNING, SUCCEEDED, FAILED, SKIPPED, ROLLED_BACK
+43. ✅ Event.source — all events tagged with emitting component (core, executor, planner, intake, validator, policy)
+44. ✅ Event.severity persistence — source + severity stored in SQLite (with migration for existing DBs)
+45. ✅ Task lifecycle in agent core — Task created, status transitions emitted, task_created/task_completed/task_failed/task_paused events
+46. ✅ Task management — get_task(), list_tasks(), pause_task(), abort_task() on MachinaCore
+47. ✅ Runtime API — POST /tasks, GET /tasks/{id}, POST /tasks/{id}/resume|pause|abort, GET /tasks/{id}/events
+48. ✅ Approval API — GET /approvals, POST /approvals/{id}/approve|deny
+49. ✅ Tool detail API — GET /tools/{tool_name} returns full ToolSpec
+50. ✅ Runtime status API — GET /runtime/status (components, tool count, active tasks, pending approvals)
+51. ✅ Max steps limit — reduced from 15 to 12 per runtime spec §11.5
+52. ✅ ApprovalRequest enhancements — task_id, status (pending/approved/denied), resolved_at fields
+
+### Event Schema Compliance (Complete ✓)
+53. ✅ Canonical event envelope — Event fields renamed: id→event_id, kind→event_type, data→payload, schema_version="1.0"
+54. ✅ Envelope-level correlation — task_id, approval_id, workspace_id, correlation_id, trace_id, actor as top-level Event fields
+55. ✅ Monotonic sequence numbers — thread-safe counter on EventBus, sequence field on every emitted event
+56. ✅ Severity standardization — default severity "INFO", uppercase values (INFO/WARN/ERROR/CRITICAL)
+57. ✅ EventBus rewrite — emit() with keyword-only args, SQLite 12-column schema, legacy migration, JSONL persistence
+58. ✅ Source taxonomy — all emit sites tagged with source (core, executor, planner, intake, validator, policy)
+59. ✅ UI event field migration — JavaScript updated: .kind→.event_type, .data→.payload throughout SPA
+60. ✅ Full test suite migration — all 286 tests updated for new event field names
+
+### Runtime Contracts (Complete ✓)
+61. ✅ Canonical enums — Severity, PolicyDecision, RiskLevel, TaskStatus, StepStatus, ApprovalStatus, RollbackStatus, RuntimeStatus in core/contracts/enums.py
+62. ✅ Prefixed ID generators — make_id() with domain prefixes (task_, plan_, step_, etc.) and optional sequential mode
+63. ✅ Runtime snapshot model — RuntimeSnapshot for dashboard status, resume logic, health inspection
+64. ✅ Model field additions — Intent.intent_id, Task.last_transition_at/reason, Plan.task_id/planner_version/validation_status, PlanStep.index/risk_level/policy_decision/last_transition_at/reason, ToolResult.message
+65. ✅ ApprovalStatus enum — ApprovalRequest.status upgraded from string to canonical ApprovalStatus enum (PENDING/GRANTED/DENIED/EXPIRED/CANCELLED)
+66. ✅ Task transition guard — TaskGuard validates all task state changes per MACHINA_STATE_MACHINE §4.4
+67. ✅ Step transition guard — StepGuard validates all step state changes per MACHINA_STATE_MACHINE §6.4
+68. ✅ Approval transition guard — ApprovalGuard validates one-shot approval lifecycle per §8.3
+69. ✅ Enum consolidation — schemas.py imports from core/contracts/enums.py; PolicyDecision moved from policy/engine.py to contracts
+
+### Runtime Infrastructure (Complete ✓)
+70. ✅ ValidationState + ToolExecutionStatus enums — added to core/contracts/enums.py (§2.9, §2.10)
+71. ✅ EventEmitter — canonical event factory in core/events/emitter.py, bus delegation or standalone+store mode
+72. ✅ RuntimeStore — hybrid JSONL + SQLite persistence in core/runtime/store.py (tasks, approvals, snapshots)
+73. ✅ TaskRuntime coordinator — core/runtime/coordinator.py wires contracts → guards → emitter → store
+74. ✅ Guard-validated task lifecycle — create, transition, persist, emit through TaskRuntime
+75. ✅ Approval lifecycle in coordinator — request, grant, deny, cancel, expire with ApprovalGuard enforcement
+
+### Core Integration (Complete ✓)
+76. ✅ TaskRuntime wired into MachinaCore — run() uses guard-validated transitions, runtime store for persistence, RuntimeSnapshot for /runtime/status
+77. ✅ Step persistence in RuntimeStore — steps table, save_step, get_step, list_steps_for_task with task index ordering
+78. ✅ StepRuntime coordinator — step lifecycle (register, transition, start/finish/fail/skip), tool event emission, task synchronisation
+
+### Execution Bridge (Complete ✓)
+79. ✅ ToolExecutionError — structured exception class in ToolRegistry for executor error translation
+80. ✅ RuntimeExecutor — async execution dispatcher: prime_steps (policy → step status), run_step (tool dispatch via StepRuntime), run_task (iterate with retry for transient errors), StepResult value object
+81. ✅ ToolRegistry ToolExecutionError handling — invoke() preserves structured error_code from ToolExecutionError instead of classifying as UNKNOWN_ERROR
+82. ✅ Built-in tools layer — core/tools/tools_builtin.py: workspace-bounded filesystem.list, filesystem.read_file, filesystem.write_file, shell.run_safe with ToolExecutionError, binary detection, size limits, shell allowlist
+83. ✅ Executor demo — core/tools/executor_demo.py: end-to-end runtime proof script (task → steps → execute → events → snapshot → artifacts)
+84. ✅ Executor flow tests — tests/test_executor_flow.py: 12 automated end-to-end tests (read-only flow, approval gate, error handling, event persistence, snapshot, artifact verification)
+
+### Test Infrastructure (Complete ✓)
+85. ✅ Shared test configuration — tests/conftest.py: sys.path setup ensuring project root is importable regardless of invocation method
+86. ✅ State transition integration tests — tests/test_state_transitions.py: 43 tests verifying task/step/approval lifecycle through runtime coordinators (happy paths, forbidden transitions, terminal states, task sync, persistence, event emission)
+
+### Approval Flow (Complete ✓)
+87. ✅ Approval demo — approval_demo.py: end-to-end proof script for human-in-the-loop lifecycle (gate → WAITING_APPROVAL → grant → EXECUTING resume)
+88. ✅ Approval flow tests — tests/test_approval_flow.py: 8 automated tests (grant unblocks step/task, denial keeps task blocked, canonical events, snapshot integration)
+89. ✅ Bidirectional approval sync — StepRuntime._sync_task_status resumes task from WAITING_APPROVAL → EXECUTING when no steps need approval
+
+### Execution Unification (Complete ✓)
+90. ✅ RuntimeExecutor wired into MachinaCore — run() uses guard-validated RuntimeExecutor instead of legacy Executor; StepRuntime registers steps, RuntimeExecutor dispatches through policy → step guards → tool registry
+91. ✅ Server.py endpoint migration — all approval/pending/resume/status endpoints use TaskRuntime + StepRuntime instead of legacy Executor; approval API uses canonical approval_id from coordinator
+92. ✅ MachinaCore approval management — approve(), deny(), list_pending_approvals(), resume_task() methods using TaskRuntime + StepRuntime; step transitions on approval grant/deny
+93. ✅ RuntimeExecutor auto_approve — auto_approve flag bypasses REQUIRE_APPROVAL policy for testing and trusted flows
+94. ✅ Stale root-level file cleanup — removed 14 duplicate files (machina_contracts.py, event_emitter.py, runtime_store.py, task_runtime.py, step_runtime.py, executor.py, tool_registry.py, tools_builtin.py, executor_demo.py, etc.)
+
+### Conversational Core — Sprint 5 (Complete ✓)
+95. ✅ ConversationSession model — Message, ConversationSession, ConversationStore with SQLite persistence
+96. ✅ /chat endpoint — multi-turn conversational API with session management
+97. ✅ Context-aware intake — parse_intent_llm_with_context() uses conversation history to resolve references
+98. ✅ Context-aware planner — create_plan_llm_with_context() leverages conversation summary
+99. ✅ Chat UI rewrite — streaming /chat/stream with token display, session tracking, legacy fallback
+100. ✅ Session auto-summary — compresses older messages via LLM when turn count exceeds threshold
+
+### Live Task Controls — Sprint 6 (Complete ✓)
+101. ✅ Step retry endpoint — POST /tasks/{id}/retry/{step_id} resets failed step and re-executes
+102. ✅ WebSocket live events — /ws endpoint with ConnectionManager, heartbeat, event bus forwarding
+103. ✅ Notification integration — toast popups + bell badge + notification panel for approvals/completions/failures
+104. ✅ Progress indication — streaming token display with blinking cursor for conversational replies
+105. ✅ Task control functions — pauseTask(), abortTask(), retryStep() wired to API endpoints
+
+### Memory & Workspace Intelligence — Sprint 7 (Complete ✓)
+106. ✅ Memory browser UI — 4-tab view: scopes, preferences, workspaces, sessions with CRUD operations
+107. ✅ Workspace model — Workspace with language/framework detection, key file discovery, git detection
+108. ✅ Workspace indexer — index_workspace() walks directory tree, detects languages/frameworks/key files
+109. ✅ Workspace persistence — WorkspaceStore with SQLite backend (workspaces.db)
+110. ✅ Preferences engine — typed preferences with DEFAULTS dict, get/set/delete/all/reset_all
+111. ✅ Memory/workspace/preferences API — CRUD endpoints for all three subsystems
+
+### Background & Notifications — Sprint 8 (Complete ✓)
+112. ✅ BackgroundRunner — async task queue with configurable max_concurrent, start/stop/submit
+113. ✅ TaskQueue — asyncio.Queue wrapper with priority support
+114. ✅ ScheduledTask — recurring task execution with configurable interval
+115. ✅ ServiceWatchdog — health check registry, run_checks(), healthy/degraded_services properties
+116. ✅ Background API — /background/submit, /background/status, /background/start, /background/stop, /health/detailed
+
+### Polish & Reliability — Sprint 9 (Complete ✓)
+117. ✅ Multi-LLM router — LLMRouter with capability-based routing, priority fallback, LLMRoute model
+118. ✅ Router wired into MachinaCore — default route + add_llm_route(), conversational replies use router
+119. ✅ Error explanation API — POST /explain-error with LLM-powered error analysis and fallback
+120. ✅ Keyboard UX — Enter/Escape/ArrowUp/ArrowDown, Ctrl+K/L, Ctrl+1-5 view switching, Alt+N new chat, input history
+121. ✅ Smart suggestions — context-aware follow-up suggestions after task completion based on tools used and outcome
+122. ✅ Rollback/retry UI — inline retry and explain buttons on failed plan steps, error explanation display
+123. ✅ MachinaCore.close() — unified resource cleanup for all SQLite connections
+124. ✅ Test cleanup fix — all integration tests use core.close() preventing Windows file lock errors
+
+### Demo Storyboard Hardening — Sprint 10 (Complete ✓)
+125. ✅ Heuristic-first intent routing — run(), chat(), chat_stream() prefer heuristic for deterministic intents before LLM fallback
+126. ✅ Process visibility — GET /processes API endpoint + list_processes intent with deterministic template
+127. ✅ Git integration hardening — branch name in git.status output, dot notation routing, natural language phrasing detection
+128. ✅ Failed task UI buttons — Retry/Explain buttons always visible on failed plan steps
+129. ✅ Context-aware reference resolution — multi-turn chat resolves ambiguous references from conversation history
+130. ✅ Path normalization — 'current directory' and similar phrases normalized to '.' in planner
+
+### Hardening — Sprint 11 (Complete ✓)
+131. ✅ Approval expiration enforcement — expire_overdue_approvals() sweeps pending approvals past TTL
+132. ✅ Approval TTL default — 5-minute TTL auto-set on request_approval(), configurable via ttl param, ScheduledTask sweeps every 30s
+133. ✅ Act 6 end-to-end validation — all sub-tests (memory scopes, preferences, workspace indexing) pass
+134. ✅ Full-pipeline integration tests — 4 end-to-end tests: list, read_file, git_status, error_handling with full event/telemetry/persistence verification
+135. ✅ Git tool completeness — git.pull, git.push, git.commit, git.stash (4 new tools, 10 total)
+136. ✅ Planner git routing — pull, push, commit, stash routed to native tools; commit extracts -m message
+137. ✅ Git tool tests — 8 new tests for pull, push, commit (regular + -a), stash (push/pop/list/invalid)
+
+### Workspace Context & System Awareness — Sprint 12 (Complete ✓)
+138. ✅ Workspace auto-indexing — run() auto-indexes workspace on first encounter, caches in memory + SQLite
+139. ✅ Workspace context in LLM planner — detected languages/frameworks injected into planner system prompt
+140. ✅ System monitoring tools — system.info, system.memory, system.disk (stdlib-only, no psutil)
+141. ✅ Content search tool — filesystem.grep for text/regex search within files with file pattern filter
+142. ✅ Planner routing for new intents — system_info and grep deterministic templates with intake detection
+143. ✅ Sprint 12 tests — 24 new tests: system tools, grep, workspace auto-indexing, planner routing, intake
+
+### Compound Workflows & Conversation Intelligence — Sprint 13 (Complete ✓)
+144. ✅ Startup diagnostics & resilience — try/except startup with per-subsystem logging, non-blocking tool registration, /health/startup endpoint
+145. ✅ Workspace-aware conversational replies — workspace context (languages, frameworks, key files) injected into chat/chat_stream LLM prompts
+146. ✅ Compound workflow templates — create_project (Python/JS scaffold), cleanup (tree+git+disk+temp search), find_and_read (search→read chain)
+147. ✅ Inter-step output bridging — steps with output_key store output; downstream steps with input_from receive resolved values
+148. ✅ Task context in conversation sessions — record_task_outcome() links task results to sessions; get_task_context() injects prior task summaries into LLM prompts
+149. ✅ Sprint 13 tests — 34 new tests: compound templates, intake detection, output bridging, task context, workspace-aware prompts, schema fields
+
+### Semantic Filesystem & RAG — Sprint 14 (Complete ✓)
+150. ✅ ChromaDB vector store — VectorStore wrapper with graceful degradation, collection-per-workspace, cosine HNSW
+151. ✅ Semantic search tool — filesystem.semantic_search with query/workspace_id/n_results parameters
+152. ✅ Indexing pipeline — SemanticIndexer with chunking, content-hash dedup, skip filters, explicit-only indexing
+153. ✅ RAG-augmented chat — _get_rag_context() injects relevant code snippets into conversational LLM prompts
+154. ✅ Index management API — POST /rag/index, GET /rag/status, DELETE /rag/{id}, POST /rag/search, GET /rag/collections
+155. ✅ Sprint 14 tests — 47 new tests: vector store, chunking, file indexing, should_index filters, intake, planner, context injection, core integration
+
+### Agent Personality & Response Style — Sprint 15 (Complete ✓)
+156. ✅ PersonalityProfile model — Pydantic model with tone, verbosity, emoji, greeting, custom system_instructions
+157. ✅ System prompt injection — personality fragment injected into _build_chat_system_prompt for all conversational LLM calls
+158. ✅ Preset profiles — 4 built-in presets (default, casual, minimal, detailed) with to_prompt_fragment()
+159. ✅ Persistence via preferences — personality stored/loaded via PreferencesEngine, survives restarts
+160. ✅ Personality API — GET/PUT /personality, GET /personality/presets, PUT /personality/preset/{name}
+161. ✅ UI personality tab — preset selector, tone/verbosity/greeting dropdowns, emoji toggle, custom instructions editor
+162. ✅ Sprint 15 tests — 32 new tests: profile model, prompt fragments, presets, core integration, system prompt injection, preferences
+
+### Workflow Composition DSL — Sprint 16 (Complete ✓)
+163. ✅ WorkflowDefinition model — Pydantic model (workflow_id, name, description, triggers, variables, steps, enabled) with trigger matching and variable resolution
+164. ✅ WorkflowStep model — mirrors PlanStep shape (tool, arguments, output_key, input_from, fallback, timeout, rollback_hint)
+165. ✅ WorkflowStore — SQLite-backed CRUD persistence (workflows.db) with save, load, load_by_name, list_all, list_enabled, delete, find_matching
+166. ✅ Planner integration — user workflows checked before _plan_general fallback; workflow intent produces workflow-v1 plans with variable resolution
+167. ✅ Intake detection — "run workflow X", "execute workflow X", "workflow X" heuristic patterns with workflow_name entity extraction
+168. ✅ Compound expansion: refactor — tree → git.status → diagnostics → diff → summary (5-step template)
+169. ✅ Compound expansion: debug_issue — diagnostics → git.status → git.log → diff → optional grep → summary (5-6 steps, error-aware)
+170. ✅ Workflow API — GET/POST /workflows, GET/PUT/DELETE /workflows/{id} with full CRUD
+171. ✅ Workflow Composer UI — visual step editor, trigger/variable configuration, enable/disable toggle, edit/delete controls
+172. ✅ Sprint 16 tests — 40 new tests: model creation, trigger matching, variable resolution, store CRUD, planner integration, intake detection, compound expansion
+
+### Multi-Agent Coordination — Sprint 17 (Complete ✓)
+173. ✅ AgentDefinition model — Pydantic model with agent_id, name, capabilities, tool_filter (fnmatch globs), system_prompt, enabled
+174. ✅ BUILTIN_AGENTS — filesystem, git, shell, system agents with scoped tool_filter and capabilities
+175. ✅ AgentPool — register/unregister/find agents by capability, intent, or tool with enabled_only filtering
+176. ✅ AgentBus — inter-agent pub/sub messaging with send, broadcast, subscribe (by agent/type/all), capped history
+177. ✅ PlanStep.delegate_to — optional agent_id field for scoped delegation in plan steps
+178. ✅ RuntimeExecutor delegation — AGENT_TOOL_DENIED gating + delegation events on agent bus
+179. ✅ Intake delegate detection — "delegate to"/"ask agent"/"use agent"/"send to agent" patterns with agent_name extraction
+180. ✅ Planner delegate template — deterministic _plan_delegate() for delegation intent
+181. ✅ Agent API + UI — 7 CRUD endpoints, Agents view (7th tab) with editor, message log, Ctrl+1-7
+182. ✅ Sprint 17 tests — 53 new tests: agent model, pool, bus, delegation schema, intake, planner, executor delegation, core integration
+
+### Agent Orchestration & Decomposition — Sprint 18 (Complete ✓)
+183. ✅ OrchestrationStrategy enum — SINGLE, ROUND_ROBIN, CAPABILITY_SCORE, FALLBACK, PIPELINE with OrchestrationConfig model
+184. ✅ Agent scoring — score_agent_for_tool() with specificity scoring (exact=1.0, prefix glob=0.3+, open=0.1)
+185. ✅ AgentPool strategy-aware selection — candidates_for_tool() sorted by score, select_agent() with configurable strategy
+186. ✅ Executor fallback delegation — FALLBACK strategy tries candidates_for_tool() before AGENT_TOOL_DENIED
+187. ✅ Executor pipeline execution — run_pipeline() chains agents sequentially with output passing
+188. ✅ Agent-aware LLM planner — agent catalog injected into system prompt, delegate_to parsed from LLM output
+189. ✅ Planner agent pool wiring — _plan_delegate() resolves agents from pool, routes to agent-specific tools
+190. ✅ Task decomposition — decompose_for_agents() decomposes complex intents into agent-scoped sub-plans
+191. ✅ MachinaCore orchestration wiring — orchestration property, set_orchestration(), agent-aware chat prompts
+192. ✅ Orchestration API + UI — GET/PUT /orchestration endpoints, strategy panel in Agents view
+193. ✅ Sprint 18 tests — 43 new tests: strategy enum, config, scoring, pool selection, planner delegation, decomposition, pipeline, core integration
+
+### Agent Persistence & Delegation Chains — Sprint 19 (Complete ✓)
+194. ✅ AgentStore SQLite — WAL-mode SQLite CRUD for user-created agents (agents.db), save/load/load_all/delete/exists
+195. ✅ AgentPool store integration — register/unregister auto-persist non-builtins, load persisted agents on init, _builtin_ids isolation
+196. ✅ MachinaCore wiring — creates AgentStore, passes to AgentPool, closes in close()
+197. ✅ DelegationChain class — push/pop path tracking, would_cycle() detection, would_exceed_depth() guard, max_depth=5
+198. ✅ AgentBus delegation management — create_chain/get_chain/remove_chain, delegate() with cycle/depth validation
+199. ✅ RuntimeExecutor chain validation — creates DelegationChain per step, DELEGATION_CYCLE error code on cycle detection, fallback chain safety checks
+200. ✅ Sprint 19 tests — 38 new tests: store CRUD, pool persistence, delegation chains, bus delegation, executor chain validation, core integration
+
+### Consensus, Delegation Viz & Agent Memory — Sprint 20 (Complete ✓)
+201. ✅ ConsensusStrategy/VoteValue/ConsensusStatus enums — MAJORITY/UNANIMOUS/WEIGHTED strategies, APPROVE/REJECT/ABSTAIN votes
+202. ✅ ConsensusRequest model — question, candidates, votes dict, strategy, min_voters, resolve() with majority/unanimous/weighted logic
+203. ✅ AgentBus consensus methods — request_consensus, cast_vote, resolve_consensus, get_consensus, list_consensus_requests
+204. ✅ Consensus events — consensus_requested, consensus_vote, consensus_resolved emitted on agent bus
+205. ✅ OrchestrationConfig consensus fields — consensus_strategy + consensus_min_voters
+206. ✅ Delegation chain API + UI — GET /agents/delegation-chains, visual chain path display with depth indicators
+207. ✅ Agent memory scope — MemoryStore 'agent' scope with set/get/delete/list/clear per-agent methods
+208. ✅ Agent memory API — GET/PUT/DELETE /agents/{id}/memory with isolation between agents
+209. ✅ Consensus API — POST/GET /consensus, POST /consensus/{id}/vote, POST /consensus/{id}/resolve
+210. ✅ UI: Consensus panel — create form, vote/resolve buttons, status display in Agents view
+211. ✅ UI: Agent Memory section — agent selector, key-value viewer, delete controls
+212. ✅ Sprint 20 tests — 54 new tests: consensus models, voting logic, bus integration, agent memory, delegation listing, core integration
+
+### Negotiation, Consensus Executor & Capability Learning — Sprint 21 (Complete ✓)
+213. ✅ NegotiationPhase/NegotiationPriority enums — 7 phases (PROPOSED→WITHDRAWN), 4 priority levels (CRITICAL=1→LOW=4)
+214. ✅ NegotiationProposal model — full lifecycle: propose, counter (multi-round), accept, reject, withdraw, resolve_by_priority; is_terminal property, max_rounds enforcement
+215. ✅ AgentBus negotiation methods — start_negotiation, counter_negotiation, accept_negotiation, reject_negotiation, resolve_negotiation_by_priority, get_negotiation, list_negotiations (with agent/tool/task/active filters)
+216. ✅ Negotiation events — negotiation_proposed, negotiation_countered, negotiation_accepted, negotiation_rejected, negotiation_resolved emitted on agent bus
+217. ✅ Negotiation API — POST/GET /negotiations, GET /negotiations/{id}, POST /negotiations/{id}/counter, /accept, /reject, /resolve
+218. ✅ Negotiation UI — create form with priority selector, negotiation cards with phase-colored badges, counter/accept/reject/auto-resolve buttons
+219. ✅ CapabilityScore model — agent_id, tool, successes, failures, total_duration_ms, error_counts, confidence formula (success_rate × min(1, samples/20))
+220. ✅ RuntimeExecutor capability recording — _record_capability() persists scores to agent memory after each delegated tool execution
+221. ✅ RuntimeExecutor consensus-aware execution — run_step_with_consensus() gates tools on multi-agent consensus; auto-voting by confidence; CONSENSUS_REJECTED error code
+222. ✅ Capability API + UI — GET /agents/{agent_id}/capabilities endpoint, Capability Learning panel with agent selector and table display
+223. ✅ Sprint 21 tests — 58 new tests: negotiation models/lifecycle, bus negotiation, capability scoring, consensus-aware executor, capability recording, core integration
+
+### Negotiation Strategies, Reputation, Consensus Learning & Handoffs — Sprint 22 (Complete ✓)
+224. ✅ AgentReputation model — cross-task aggregation with total_successes/failures, tools_used dict, recent_outcomes list, reputation_score (40% lifetime + 60% recent × sample_confidence)
+225. ✅ ConsensusPatternScore model — per-tool pattern tracking with approval_rate, should_skip_consensus (≥10 samples and >95% approval)
+226. ✅ HandoffStatus/HandoffRequest models — full lifecycle (REQUESTED→ACCEPTED→EXECUTING→COMPLETED/FAILED/DECLINED/CANCELLED) with preconditions, constraints, reason, is_terminal
+227. ✅ suggest_counter_agents() — heuristic ranking of alternative agents by capability confidence, excludes proposed agent
+228. ✅ AgentBus auto_counter — picks best alternative via suggest_counter_agents(), submits counter-proposal, broadcasts negotiation_auto_countered
+229. ✅ AgentBus consensus pattern learning — record_consensus_outcome, get_consensus_pattern, list_consensus_patterns, should_skip_consensus
+230. ✅ AgentBus handoff protocol — request_handoff, accept_handoff, decline_handoff, complete_handoff, fail_handoff, cancel_handoff, get_handoff, list_handoffs (with agent_id/task_id/active_only filters)
+231. ✅ RuntimeExecutor dynamic consensus skip — should_skip_consensus check before candidate lookup, consensus outcome recording after resolution
+232. ✅ RuntimeExecutor reputation recording — _record_capability() also records AgentReputation to agent memory, get_agent_reputation() returns cross-task metrics
+233. ✅ Reputation API — GET /agents/{agent_id}/reputation
+234. ✅ Negotiation auto-counter API — POST /negotiations/{negotiation_id}/auto-counter
+235. ✅ Consensus patterns API — GET /consensus/patterns, GET /consensus/patterns/{tool}
+236. ✅ Handoff API — POST/GET /handoffs, GET /handoffs/{id}, POST /handoffs/{id}/accept, /decline, /complete, /cancel
+237. ✅ UI: Agent Reputation panel — agent selector, reputation/success score cards, tools used badges
+238. ✅ UI: Consensus Patterns table — tool pattern, approvals/rejections, approval rate, auto-skip indicator
+239. ✅ UI: Task Handoffs panel — create form, status-colored cards, accept/decline/complete/cancel buttons
+240. ✅ UI: Auto-Counter button — on active negotiation cards next to Auto-Resolve
+241. ✅ Sprint 22 tests — 69 new tests: reputation model, consensus patterns, handoff lifecycle, suggest_counter_agents, bus auto-counter/patterns/handoffs, executor reputation, core integration
+
+### Agent Health, Discovery, Workflow Chains & Performance — Sprint 23 (Complete ✓)
+242. ✅ AgentHealthStatus enum — ONLINE, DEGRADED, OFFLINE with automatic state transitions
+243. ✅ AgentHealthRecord model — rolling health snapshot with consecutive failure/success tracking, latency monitoring, degradation detection, recovery thresholds
+244. ✅ AgentWorkflowStep/AgentWorkflowChain models — multi-step delegation sequences with agent_id→tool mapping, output_key/input_from bridging, agent_sequence property
+245. ✅ DiscoveredCapability model — inferred capabilities from filter (tool_filter globs) or history (execution data) sources with confidence scores
+246. ✅ AgentBus health monitoring — record_health_check (auto-evaluate status), get_agent_health, list_agent_health, set_agent_status (manual override), agent_health_changed events
+247. ✅ AgentBus workflow chains — create_workflow_chain, get_workflow_chain, list_workflow_chains, delete_workflow_chain with workflow_chain_created/deleted events
+248. ✅ RuntimeExecutor health recording — _record_capability() records health checks via bus after each delegated tool execution
+249. ✅ RuntimeExecutor capability discovery — discover_capabilities() expands tool_filter globs against registry + merges execution history from memory
+250. ✅ RuntimeExecutor performance snapshots — get_agent_performance() returns combined health, reputation, capabilities, and discovered capabilities
+251. ✅ Health API — GET /agents/health, GET /agents/{id}/health, POST /agents/{id}/health/status
+252. ✅ Capability discovery API — GET /agents/{id}/capabilities/discovered
+253. ✅ Performance API — GET /agents/{id}/performance, GET /agents/performance/comparison
+254. ✅ Workflow chains API — POST/GET /workflow-chains, GET/DELETE /workflow-chains/{id}
+255. ✅ UI: Agent Health panel — status indicators (green/amber/red), error streak, latency, degraded_since display
+256. ✅ UI: Capability Discovery panel — agent selector, tool/source/confidence table with filter/history badges
+257. ✅ UI: Performance Dashboard — compare all agents with reputation score, success rate, latency metric cards
+258. ✅ UI: Workflow Chains panel — create form with dynamic step editor, chain visualization with agent→tool flow arrows, delete controls
+259. ✅ Sprint 23 tests — 49 new tests: health status/record, workflow chains, discovery, bus health/chains/events, executor recording/discovery/performance, core integration
+
+### Health Persistence, Chain Execution, Trends & Auto-Routing — Sprint 24 (Complete ✓)
+260. ✅ HealthStore SQLite — WAL-mode SQLite persistence (health.db) with three tables: health_checks, health_snapshots, performance_trends
+261. ✅ AgentBus health auto-persist — record_health_check() writes checks + snapshots to SQLite, _load_health_snapshots() restores on startup
+262. ✅ AgentBus trend methods — record_performance_trend(), get_health_checks(), get_health_trends() with health_store delegation
+263. ✅ Workflow chain execution — RuntimeExecutor.run_workflow_chain() converts chain steps → PlanSteps, sequential execution with output bridging, stops on failure
+264. ✅ Performance trend recording — _record_capability() records time-series trend data (reputation_score, success_rate, avg_latency_ms, health_status) after each delegated execution
+265. ✅ get_agent_performance() trends — performance endpoint now includes trends data from health_store
+266. ✅ Health-aware auto-routing — AgentPool.candidates_for_tool() excludes OFFLINE agents, deprioritizes DEGRADED (sort by health_tier then specificity)
+267. ✅ AgentPool.agent_bus wiring — optional AgentBus parameter for health-aware routing, wired in MachinaCore
+268. ✅ HealthStore in MachinaCore — health.db created, passed to AgentBus, closed on core.close()
+269. ✅ Workflow chain execution API — POST /workflow-chains/{chain_id}/execute
+270. ✅ Health history API — GET /agents/{agent_id}/health/history
+271. ✅ Health trends API — GET /agents/{agent_id}/health/trends
+272. ✅ UI: Health History panel — agent dropdown, check log with success/failure dots, latency, errors, timestamps
+273. ✅ UI: Performance Trends panel — agent dropdown, 3-card summary (Score, Success%, Latency), sparkline bar chart
+274. ✅ UI: Workflow chain Execute button — inline execute button on chain cards
+275. ✅ Sprint 24 tests — 38 new tests: HealthStore CRUD (checks/snapshots/trends), bus persistence/loading/trends/history, workflow chain execution (success/multi-step/failure/task_id), pool health-aware routing (offline/degraded/healthy/no-bus/select/all-offline), executor trend recording, core integration (wiring/persistence/restart)
+
+### Intelligent Recovery & Pipeline Evolution — Sprint 25 (Complete ✓)
+276. ✅ Enhanced output bridging — _bridge_step_input() injects _prior_output key, resolves path from files/matches/string/list, forwards non-underscore dict keys via setdefault
+277. ✅ Condition evaluation — RuntimeExecutor.evaluate_condition() parses `output_key:field op value`, supports ==, !=, contains, not_empty operators
+278. ✅ Conditional pipeline branching — AgentWorkflowStep.condition field, run_workflow_chain() evaluates conditions before each step, skips unmet conditions via skip_step()
+279. ✅ Agent auto-healing in run_step — detects DEGRADED/OFFLINE agents before delegation, finds healthy candidates, reroutes step, emits agent_auto_healed event
+280. ✅ AgentBus.auto_heal() — finds healthy replacement agent from candidates, skips self and unhealthy, emits agent_auto_healed event
+281. ✅ SVG time-series trend chart — replaced sparkline bar chart with dual-line SVG chart (amber=reputation_score, green=success_rate) in Performance Trends panel
+282. ✅ UI condition field — workflow step editor has condition input, submission includes condition, chain cards show ⚡condition badge
+283. ✅ Auto-heal API — POST /agents/{agent_id}/auto-heal endpoint for manual heal trigger
+284. ✅ Sprint 25 tests — 41 new tests: output bridging (8), condition evaluation (13), conditional chain execution (3), auto-heal run_step (3), bus auto_heal (5), chain output bridging (2), workflow step condition (3), core integration (3)
+
+### Autonomous Agent Lifecycle — Sprint 26 (Complete ✓)
+285. ✅ Auto-healing scheduler — ScheduledTask (60s interval) in MachinaCore._health_sweeper, _sweep_agent_health() iterates agent health records, probes tool_filter patterns, calls auto_heal() for DEGRADED/OFFLINE agents
+286. ✅ Workflow chain templates — BUILTIN_CHAIN_TEMPLATES dict with 3 pre-built chains: code-review (tree→git→grep→read), deploy-check (git→log→memory→disk), project-scan (tree→search→git→info)
+287. ✅ AgentBus.create_chain_from_template() — instantiates AgentWorkflowChain from built-in template by name, returns chain or None
+288. ✅ Agent lifecycle events — AgentPool.register() emits agent_registered, unregister() emits agent_unregistered on agent bus
+289. ✅ Agent summary API — GET /agents/summary returns total, online, degraded, offline counts + top_agent + top_score
+290. ✅ Template APIs — GET /workflow-chain-templates lists available templates, POST /workflow-chains/from-template/{template_id} creates chain from template
+291. ✅ UI: Agent status bar — fleet health summary strip with online/degraded/offline dot counts + top performer display
+292. ✅ UI: Chain template picker — "Use Template" button, template card list with name/description/step count, one-click chain creation
+293. ✅ Sprint 26 tests — 28 new tests: chain templates (6), bus template creation (4), lifecycle events (5), auto-healing scheduler (6), agent summary (2), core integration (5)
+
+### Cross-Agent Pipelines & Communication — Sprint 27 (Complete ✓)
+294. ✅ Cross-agent conditional branching — AgentWorkflowStep.branch_to field, executor re-routes steps to alternate agent when condition fails instead of skipping
+295. ✅ Pipeline capability negotiation — PipelineNegotiationResult model, AgentBus.negotiate_pipeline() scores candidates by confidence, detects ties as conflicts
+296. ✅ Agent request/response protocol — AgentRequest/AgentResponse models with lifecycle (PENDING→DELIVERED→RESPONDED), AgentBus send_request/send_response/list_requests
+297. ✅ Workflow chain versioning — version/version_history/updated_at on AgentWorkflowChain, snapshot(), update_steps(), rollback() methods
+298. ✅ Bus chain versioning — AgentBus.update_workflow_chain() and rollback_workflow_chain() with events
+299. ✅ API endpoints — 7 new endpoints: POST/GET /agent-requests, /agent-requests/{id}, /agent-requests/{id}/respond, /workflow-chains/{id}/negotiate, PUT /workflow-chains/{id}, /workflow-chains/{id}/rollback, /workflow-chains/{id}/versions
+300. ✅ UI panels — Agent Requests panel (form, status list, respond), chain version/negotiate/rollback/history buttons, branch_to badges and step editor field
+301. ✅ Sprint 27 tests — 44 new tests: request model (7), pipeline negotiation result (1), branching (3), chain versioning (8), bus request/response (7), bus negotiation (4), bus chain versioning (6), executor branching (2), core integration (6)
+
+### Agent Communication & Execution History — Sprint 28 (Complete ✓)
+302. ✅ BroadcastQuery model — query_id, from_agent, question, target_agents, responses dict, status lifecycle (PENDING→COLLECTING→COMPLETED), add_response(), complete()
+303. ✅ AgentBus broadcast methods — broadcast_query, respond_to_query, complete_query, get_query, list_queries with active_only filter and events
+304. ✅ CapabilityAnnouncement model — announcement_id, agent_id, capabilities list, tool_filter list with bus announce/list methods and events
+305. ✅ ChainExecutionRecord model — execution_id, chain_id, chain_name, status (RUNNING/SUCCESS/PARTIAL/FAILED), step counters, finish() method
+306. ✅ AgentBus chain execution methods — record_chain_execution, list_chain_executions, get_chain_execution with events
+307. ✅ RuntimeExecutor chain recording — run_workflow_chain() auto-records execution history via agent bus after completion
+308. ✅ CollaborationSession model — session_id, task_id, participants, shared context dict, join/leave/set_context/close lifecycle
+309. ✅ AgentBus collaboration methods — create/join/leave/set_context/close/list collaborations with events
+310. ✅ API endpoints — 17 new endpoints for broadcast queries, capability announcements, chain executions, collaborations
+311. ✅ UI panels — 4 new panels: Broadcast Queries, Chain Execution History, Capability Announcements, Collaboration Sessions
+312. ✅ Sprint 28 tests — 49 new tests: broadcast query model (5), announcement model (1), execution record model (4), collaboration model (5), bus broadcasts (8), bus announcements (3), bus chain history (4), bus collaborations (10), executor chain recording (2), core integration (6)
+
+### Pipeline Replay, Broadcast Aggregation & Agent Task Queue — Sprint 29 (Complete ✓)
+313. ✅ ChainReplayRequest model — replay_id, source_execution_id, chain_id, chain_name, override_arguments, result_execution_id
+314. ✅ BroadcastAggregation model — aggregation_id, query_id, strategy (ALL/FIRST/MERGE/MAJORITY), result, response_count
+315. ✅ AgentTaskItem model — item_id, agent_id, tool, arguments, priority (1-5), status lifecycle (QUEUED→RUNNING→COMPLETED/FAILED/CANCELLED)
+316. ✅ AgentBus replay methods — request_chain_replay, get_chain_replay, list_chain_replays, complete_chain_replay with events
+317. ✅ AgentBus aggregation methods — aggregate_broadcast (4 strategies), expire_broadcast_query with events
+318. ✅ AgentBus task queue methods — enqueue_task (priority-sorted), dequeue_task, complete/fail/cancel_task_item, list/get with events
+319. ✅ RuntimeExecutor replay — replay_workflow_chain() re-creates chain from execution record, applies overrides, links replay to result
+320. ✅ API endpoints — 15 new endpoints for chain replays, broadcast aggregation/expiry, agent task queue CRUD
+321. ✅ UI panels — Agent Task Queue panel (enqueue form, priority-sorted list, dequeue/complete/cancel), Replay button on executions, Aggregate/Expire buttons on broadcasts
+322. ✅ Sprint 29 tests — 46 new tests: replay model (3), aggregation model (2), task item model (6), bus replay (5), bus aggregation (10), bus task queue (13), executor replay (2), core integration (6)
+
+### Task Queue Auto-Execution, Broadcast Timeouts & Pipeline Wizard — Sprint 30 (Complete ✓)
+323. ✅ BroadcastQuery.timeout_ms — configurable timeout field (0 = no timeout), is_overdue property
+324. ✅ AgentBus.broadcast_query() timeout_ms — keyword argument support, passed to model constructor
+325. ✅ AgentBus.expire_overdue_queries() — sweeps all queries, expires overdue, returns expired list
+326. ✅ RuntimeExecutor.auto_execute_task() — dequeues task item, invokes tool via registry, completes/fails item
+327. ✅ RuntimeExecutor.auto_execute_agent_queue() — drains all QUEUED tasks for agent in priority order
+328. ✅ MachinaCore._broadcast_sweeper — ScheduledTask (30s interval), _sweep_broadcast_timeouts() method
+329. ✅ API endpoints — 3 new: POST /agent-tasks/{id}/auto-execute, POST /agent-tasks/auto-execute-queue/{agent_id}, POST /broadcast-queries/with-timeout
+330. ✅ UI: Auto-Execute buttons — ⚡ Auto-Execute on QUEUED items, Auto-Execute All for batch processing
+331. ✅ UI: Broadcast timeout — timeout_ms input field on form, timeout badge on query cards
+332. ✅ UI: Pipeline wizard — agent/tool dropdown selectors from API, step reordering (▲/▼), step numbering
+333. ✅ Sprint 30 tests — 29 new tests: broadcast timeout model (5), bus timeout (8), auto-execute task (5), auto-execute queue (4), core integration (7)
+
+### Capability Auto-Discovery, Parallel Chain Execution & Smart Task Scheduling — Sprint 31 (Complete ✓)
+334. ✅ AgentWorkflowStep.parallel_group — optional group key for concurrent execution within chains
+335. ✅ AgentPool.best_agent_for_tool() — capability-confidence selection with memory store lookup, specificity fallback
+336. ✅ RuntimeExecutor.schedule_task() — auto-routes task to best agent, enqueues on bus, returns {status, agent_id, item_id, confidence}
+337. ✅ RuntimeExecutor.run_workflow_chain_parallel() — groups steps by parallel_group, runs groups sequentially but concurrent within group via asyncio.gather, falls back to sequential when no groups
+338. ✅ MachinaCore._discovery_sweeper — ScheduledTask (90s interval), _sweep_capability_discovery() discovers capabilities for all agents
+339. ✅ Bug fix: core.executor → core.runtime_executor in server.py auto-execute endpoints (2 locations)
+340. ✅ API endpoints — 5 new: POST /tasks/schedule, POST /workflow-chains/{id}/execute-parallel, POST /discovery/run, GET /discovery/status
+341. ✅ UI: Smart Task Scheduling panel — tool/args/priority form, schedule to best agent, result display
+342. ✅ UI: Discovery Status panel — run discovery sweep, agent capability list with source/confidence badges
+343. ✅ UI: Parallel chain support — parallel_group input in step editor, ∥ Parallel execute button, parallel_group badges on chain cards
+344. ✅ Sprint 31 tests — 28 new tests: parallel_group model (4), best_agent_for_tool (5), schedule_task (5), parallel chain execution (7), core integration (7)
+
+### Intent Hardening & LLM Guardrails — Sprint 32 (Complete ✓)
+345. ✅ Dynamic tool-name routing — registry-based detection of dot-notation tool names (system.info, filesystem.list, etc.) via startup-populated _tool_registry_names set, prefix-to-intent mapping, filesystem sub-intent refinement
+346. ✅ LLM intent guardrail — _query_has_tool_signal() last-resort check: when both LLM and heuristic classify as general, detects registered tool names in raw query to force task routing
+347. ✅ Human-readable output formatting — _format_system_output() for system.info/memory/disk/status, _format_dict_output() for generic dicts; replaces raw JSON dumps in plan result summaries
+348. ✅ Stale session cleanup — ConversationStore.purge_stale(max_age_days, min_messages) deletes old/empty sessions; DELETE /conversations/purge API endpoint
+349. ✅ Server port conflict auto-recovery — _check_port() at startup detects busy port, identifies holder via netstat/lsof, auto-kills stale process (Windows + POSIX)
+350. ✅ Sprint 32 tests — 37 new tests: dynamic routing (15), tool-signal guardrail (5), output formatting (10), session purge (4), port check (2), core integration (1)
+
+### Pipeline Wizard & Cross-Agent Optimization — Sprint 33 (Complete ✓)
+351. ✅ AgentBus.optimize_chain() — dependency graph analysis via output_key/input_from, topological grouping into parallel execution groups
+352. ✅ AgentBus.apply_optimization() — applies parallel groups as annotations on chain steps in-place
+353. ✅ AgentBus.auto_assign_chain() — uses negotiate_pipeline to assign best agents to chain steps by capability confidence
+354. ✅ Pipeline wizard drag-and-drop — HTML5 drag reordering with drag handles, visual feedback during drag
+355. ✅ Enhanced step editor — description, output_key, input_from, arguments (JSON), condition, branch_to, parallel_group fields per step with prefill support
+356. ✅ Auto-Assign Agents button — creates temp chain, negotiates via pipeline, assigns best agents to form dropdowns
+357. ✅ Vertical flow visualization — _renderChainStepFlow() with colored badges: output_key (emerald), input_from (sky), condition (amber), branch_to (cyan), parallel_group (teal), args (slate)
+358. ✅ Optimize button on chain cards — POSTs to /optimize, applies parallel groups, shows toast with group count
+359. ✅ Auto-Assign button on chain cards — POSTs to /auto-assign, refreshes chain list with updated agent assignments
+360. ✅ API endpoints — POST /workflow-chains/{id}/auto-assign, /optimize, /apply-optimization
+361. ✅ Sprint 33 tests — 26 new tests: optimize_chain (7), apply_optimization (3), auto_assign_chain (4), step editor fields (4), complex optimization (3), core integration (5)
+
+### Workspace Shell Interface — Sprint 34 (Complete ✓)
+362. ✅ File browse API — POST /files/browse endpoint with directory listing via filesystem.list tool
+363. ✅ File read API — POST /files/read endpoint with content preview (100KB cap) via filesystem.read_file tool
+364. ✅ Process detail API — GET /processes/{pid} endpoint via process.info tool
+365. ✅ Process stop API — POST /processes/{pid}/stop endpoint via process.stop tool
+366. ✅ System status dashboard API — GET /system/status combined endpoint: tools count, system info/memory/disk, agent fleet stats, active tasks
+367. ✅ File Explorer view — split-panel layout with directory tree (breadcrumb, go-up, refresh) and file preview (syntax-aware icons, formatted sizes)
+368. ✅ Process Monitor view — sortable table (PID, Name, Status, CPU%, Memory) with search filter, stop button with confirmation, process stats
+369. ✅ Command Palette — Ctrl+K fuzzy search overlay with keyboard navigation (ArrowUp/Down, Enter, Escape), categories (Views, Actions, Tools), unmatched queries sent to Neural Link
+370. ✅ System Status Bar — persistent bottom bar with workspace hostname, active task count, agent fleet status (online/total), memory usage, 30s polling
+371. ✅ View system expansion — 9 views (added Explorer + Processes), Ctrl+1-9 keyboard shortcuts, nav tabs, dock buttons
+372. ✅ Sprint 34 tests — 31 new tests: file browse API (4), file read API (2), process endpoints (3), system status (3), command palette (4), view system (3), file helpers (7), core integration (5)
+
+### Metrics & Observability Dashboard — Sprint 35 (Complete ✓)
+373. ✅ EventBus query enhancements — query_events() source/severity filters, ORDER BY rowid DESC (newest first), event_types(), event_sources(), event_count() methods
+374. ✅ Metrics dashboard API — GET /metrics/dashboard (combined plan_summary + tool_summary + tool_errors + event_count)
+375. ✅ Events query API — GET /events/query with type/source/severity/plan_id filters, pagination (limit/offset), total count
+376. ✅ Events meta API — GET /events/meta returns distinct types, sources, severities for filter dropdowns
+377. ✅ Settings API — GET /settings/info (system info), GET/PUT/DELETE /settings/preferences (preference CRUD)
+378. ✅ Metrics view — stitch performance_monitor style: 4 overview cards (success rate, avg steps, duration, event count), SVG bar chart with success overlay, tool performance table, error list
+379. ✅ Event Inspector view — filter bar (type/source/severity dropdowns), paginated event table with severity badges, newest-first ordering
+380. ✅ Settings view — glass-panel system info (neon-glow-primary, backdrop-blur), preferences CRUD, performance bars (neon progress with box-shadow), RAG index status
+381. ✅ View system expansion — 12 views (added Metrics, Events, Settings), nav tabs, dock buttons, Ctrl+0 for Metrics, command palette entries
+382. ✅ Sprint 35 tests — 29 new tests: event filtering (13), API shapes (5), UI structure (11)
+
+### Agent Communication, Pipeline Lanes & Negotiation — Sprint 36 (Complete ✓)
+383. ✅ Communications feed API — GET /agents/communications/feed returns unified timeline of requests, responses, negotiations, handoffs, broadcasts, and collaborations (newest first)
+384. ✅ Communication graph API — GET /agents/communications/graph returns nodes (agents) and edges (messages) for SVG visualization
+385. ✅ Negotiation timeline API — GET /negotiations/{id}/timeline returns round-by-round history (proposed → countered → accepted/resolved)
+386. ✅ Bulk negotiation API — POST /workflow-chains/negotiate-all runs pipeline negotiation across all chains, returns assignments and conflicts
+387. ✅ Communications sub-tab — 6th agent sub-tab with stats cards (messages, negotiations, pending requests, collaborations), SVG communication graph, activity feed with type filter, and negotiation timeline viewer
+388. ✅ Communication graph SVG — circular layout with agent nodes, color-coded directed edges (cyan=request, amber=negotiation, purple=handoff, emerald=broadcast), edge aggregation with multiplier labels, arrowhead markers
+389. ✅ Activity feed — unified feed merging all inter-agent event types with Material icons, status badges, type filter dropdown, timestamps
+390. ✅ Negotiation timeline view — vertical timeline with phase-colored dots (cyan=proposed, amber=countered, green=accepted, red=rejected, purple=resolved), round numbers, agent labels, reason quotes
+391. ✅ Pipeline lane view — horizontal agent lanes with draggable steps, color-coded per agent, drop zones for cross-agent reassignment, output_key/input_from/condition badges
+392. ✅ Lane drag-and-drop — HTML5 drag between agent lanes with visual ring feedback, optimistic UI update, persists via PUT /workflow-chains/{id} with version increment
+393. ✅ Negotiate All button — bulk negotiation across all workflow chains with conflict count in toast notification
+394. ✅ Sprint 36 tests — 26 new tests: communication feed (5), communication graph (4), negotiation timeline (4), pipeline lane view (4), negotiate all (2), lane reassignment versioning (2), core integration (5)
+
+### Conflict Resolution, Pipeline Construction & Message Threading — Sprint 37 (Complete ✓)
+395. ✅ Conflict resolution API — POST /workflow-chains/{id}/resolve-conflicts applies user-chosen agents for tied steps, persists via versioned update
+396. ✅ Interactive conflict picker UI — negotiateChain() displays radio buttons for each tied agent per conflict, inline Resolve Conflicts button, updates chain on resolution
+397. ✅ Message threading API — GET /agent-messages/threads groups messages by correlation_id into conversation threads with participants, types, timestamps
+398. ✅ Threaded message view UI — Flat/Threads toggle buttons, collapsible thread cards with correlation_id header, message count badge, participant list, expand/collapse conversation
+399. ✅ Visual pipeline construction — "New from Lanes" button in Pipeline Lane View, tool palette with filter, drag tools into agent lanes, agent selector per lane, submit to create workflow chain
+400. ✅ Lane builder UI — tool palette (draggable tools from API), dynamic agent lane creation, tool drop zones with visual feedback, chain name/description inputs, create chain from lane contents
+401. ✅ Correlation_id display in flat view — flat message log shows purple 🔗 correlation_id link for threaded messages
+402. ✅ Sprint 37 tests — 25 new tests: conflict resolution (6), lane chain creation (5), message threading (7), thread endpoint logic (2), core integration (5)
+
+### Desktop Shell — Sprint 38 (Complete ✓)
+403. ✅ Tauri 2 project scaffold — desktop/ directory with Cargo.toml, tauri.conf.json, package.json, capabilities, build.rs
+404. ✅ Backend lifecycle manager — Rust shell spawns Python FastAPI as child process, detects existing backend on port 8100, clean shutdown on exit
+405. ✅ Loading screen — glassmorphic splash page polls health endpoint, redirects to Machina OS UI when backend is ready, timeout error handling
+406. ✅ System tray — Show/Quit menu, left-click to focus, close-to-tray behaviour (window hides instead of quitting)
+407. ✅ CORS middleware — FastAPI CORSMiddleware allowing Tauri origins (tauri://localhost, localhost, 127.0.0.1) for cross-origin health check
+408. ✅ App icon generation — Pillow-generated branded icons (dark bg, cyan M letterform): ICO multi-res, PNG 32-1024px, Windows Store logos
+409. ✅ Build verification — release build produces machina-os-desktop.exe (4 MB), MSI installer (1.9 MB), NSIS installer (1.3 MB), verified launch
+
+### LLM Settings UI — Sprint 39 (Complete ✓)
+410. ✅ LLMClient.reconfigure() — hot-reconfigure base_url, model, api_key, provider with httpx client recreation when auth/URL changes
+411. ✅ POST /llm/config extended — accepts api_key and provider parameters, persists all LLM config to preferences
+412. ✅ GET /llm/test endpoint — connectivity test returning ok/error + model list + provider
+413. ✅ LLM config persistence — saved to preferences via PreferencesEngine, restored on MachinaCore startup via _apply_saved_llm_config()
+414. ✅ GET /llm/status extended — returns provider and has_api_key fields
+415. ✅ LLM Settings UI panel — provider selector (Ollama/OpenAI), base URL, API key (password field), model dropdown with refresh, Save/Test Connection buttons, connection status dot
+416. ✅ Sprint 39 tests — 6 new tests: reconfigure model/base_url/api_key/provider_auto_detect/noop/clear_key
+
+### Distribution Packaging — Sprint 40 (Complete ✓)
+417. ✅ Bundle script — scripts/bundle_python.py downloads Python 3.12 embeddable, installs pip + deps, copies source to desktop/src-tauri/bundle/ (52 MB)
+418. ✅ Embedded Python launcher — lib.rs start_backend() checks for bundle/python/python.exe first (distribution mode), falls back to system python (dev mode)
+419. ✅ Tauri resource bundling — tauri.conf.json resources config includes bundle/ directory in MSI/NSIS installers
+420. ✅ Distribution build script — scripts/build_dist.ps1 orchestrates bundle + tauri build with --with-rag flag for optional ChromaDB
+421. ✅ Self-contained installers — MSI (23.5 MB) and NSIS (16.4 MB) include Tauri exe + embedded Python + all dependencies + Machina OS source
+422. ✅ Zero-prerequisite target — installed app runs without requiring Python, pip, or any dependencies on the target machine
+
+### Demo Mode Core Infrastructure — Sprint 41 (Complete ✓)
+423. ✅ DemoMode enum — INTERNAL (full access), REVIEWER (write but non-destructive), DEMO (read-only) with MACHINA_MODE env var + preferences persistence
+424. ✅ Tool gating in ToolRegistry — set_allowed_tools(), is_tool_gated(), DEMO_TOOL_BLOCKED error code, filtering in invoke() and list_tools()
+425. ✅ DEMO_SAFE_TOOLS whitelist — 17 read-only tools; REVIEWER_EXTRA_TOOLS — 14 write-but-safe tools; BLOCKED_TOOLS — 6 dangerous tools
+426. ✅ DemoSessionManager — TTL-based session lifecycle (default 30 min), create/get/touch/expire_stale
+427. ✅ Demo API endpoints — GET /demo/status, PUT /demo/mode, POST /demo/reset, POST /demo/seed, GET /demo/telemetry, GET /demo/sessions, GET /demo/guided-prompts
+428. ✅ Demo sweeper — ScheduledTask (60s) expires stale demo sessions in MachinaCore
+429. ✅ UI badge + reset button — demo mode badge in header, reset button with restart_alt icon
+430. ✅ Sprint 41 tests — 58 tests: DemoMode enum, tool gating, session manager, resolve_mode, core integration
+
+### Guided Demo Experience — Sprint 42 (Complete ✓)
+431. ✅ Orientation overlay — welcome modal explaining Neural Link, Tools, Explorer, read-only restrictions
+432. ✅ Guided tour system — 9-step tooltip tour targeting UI elements with prev/next/dots navigation
+433. ✅ Quick prompts — 8 curated demo prompts with icons and categories from /demo/guided-prompts API
+434. ✅ Seed workspace — 12-file "Acme Web Platform" sample project (auth handler, users API, tests, config, .gitignore)
+435. ✅ Simplified nav — DEMO_NAV_VIEWS restricts visible views in demo mode (Home, Chat, Tools, Explorer, Agents, Settings)
+
+### Demo Deployment & Landing — Sprint 43 (Complete ✓)
+436. ✅ Landing page view — hero section with orb animation, trust strip, 6-card capabilities grid, Take the Tour / Try It Now CTAs
+437. ✅ Session isolation + auth — DemoSessionManager TTL lifecycle, HMAC-SHA256 reviewer token generation/verification via MACHINA_REVIEWER_SECRET
+438. ✅ Output sanitization — sanitize_output() strips home dirs, usernames, Windows drive letters from tool outputs; wired into _plan_to_response()
+439. ✅ DemoTelemetry — in-memory event collector with filters (session_id, event_type), summary, max cap
+440. ✅ Docker deployment — Dockerfile + docker-compose.yml with MACHINA_MODE=demo, Ollama host passthrough, machina-data volume
+
+### Distribution Hardening — Sprint 44 (Complete ✓)
+441. ✅ Path safety read-write split — _validate_path() accepts `write` parameter; reads allowed in system directories (C:\Program Files, etc.), writes/deletes blocked; fixes MSI install path blocking
+442. ✅ Workspace root wiring — MachinaCore.__init__() calls set_workspace_root(data_dir.parent) after tool registration, establishing filesystem boundary enforcement
+443. ✅ LLM split timeouts — httpx.Timeout with connect=10s, read=120s; prevents premature timeout during Ollama model loading
+444. ✅ LLM check_availability() diagnostics — returns {reachable, detail, error_type} dict; distinguishes connection_refused, timeout, auth_error; provider-specific messages
+445. ✅ LLM list_models() timeout increase — 15s for cloud providers, 20s for Ollama; granular error logging (ConnectError vs TimeoutException)
+446. ✅ /llm/status diagnostic fields — returns detail and error_type alongside available status; /llm/test surfaces diagnostic detail
+447. ✅ LLM settings UI diagnostics — disconnected state shows specific reason ("not running", "check API key", "service may be starting up") instead of generic "Disconnected"
+448. ✅ RAG settings UI overhaul — distinguishes 501 (not installed, shows pip install hint) from errors; status dot + collection count; active/available/unavailable states
+449. ✅ Status bar LLM indicator — new LLM status dot in system status bar (green=connected, red=offline) with provider name, refreshed every 30s
+450. ✅ Sprint 44 tests — 20 new tests: path read/write safety (7), fs tool integration (3), workspace root wiring (1), LLM diagnostics (4), split timeout (1), model listing (1), RAG degradation (1), data dir fallback (2)
+
+### Test Infrastructure & Desktop Polish — Sprint 45 (Complete ✓)
+451. ✅ Test isolation fix — clear_intake_state() resets module-level _tool_registry_names and _workflow_store_ref; wired into MachinaCore.close() to prevent stale SQLite refs from poisoning subsequent test instances
+452. ✅ Cross-test contamination resolved — all 23 pre-existing test failures eliminated (sqlite3.ProgrammingError: closed database, AttributeError: _agent_pool); root cause: MachinaCore.close() closed workflow_store but module-level ref in intake.py still pointed to it
+453. ✅ RuntimeExecutor attribute safety — test_sprint21.py __new__-constructed executors now set _agent_pool=None and _agent_bus=None to prevent AttributeError
+454. ✅ Frameless window chrome — decorations=false in tauri.conf.json; custom titlebar with drag region (data-tauri-drag-region), minimize/maximize/close SVG buttons matching glassmorphic design
+455. ✅ Persistent shell architecture — loading page as iframe host; showApp() transitions from loading screen to iframe instead of window.location.href navigation; Tauri API stays accessible on parent page
+456. ✅ Window control capabilities — withGlobalTauri=true; capabilities/default.json adds core:window:allow-minimize, allow-maximize, allow-unmaximize, allow-hide, allow-start-dragging, allow-toggle-maximize
+457. ✅ Sprint 45 tests — 17 new tests: clear_intake_state (5), core.close() intake reset (4), desktop config verification (6), executor attribute safety (2)
+
+### Auto-Updater & Home Dashboard — Sprint 46 (Complete ✓)
+458. ✅ Tauri auto-updater plugin — tauri-plugin-updater v2 dependency in Cargo.toml, updater permissions in capabilities/default.json (updater:default, allow-check, allow-download-and-install)
+459. ✅ Updater configuration — plugins.updater section in tauri.conf.json with endpoints (GitHub Releases placeholder) and pubkey field
+460. ✅ Rust updater logic — check_for_updates() async function: spawns after UI loads (10s delay), calls handle.updater()?.check().await, injects __MACHINA_UPDATE object and showUpdateBanner() into webview via eval()
+461. ✅ Desktop update banner — glassmorphic notification banner in desktop/src/index.html with Install & Restart / Later buttons, slideUp animation, downloadAndInstall() via __TAURI__ API
+462. ✅ Home dashboard upgrade — 4-column system health cards (Memory Usage, LLM Provider, Agent Fleet, Registered Tools), 2-column secondary row (Events Today, Pending Approvals), contextual event feed sidebar, workspace context panel
+463. ✅ Dashboard data functions — loadHomeHealth() fetches /system/status + /agents/summary + /llm/status in parallel; loadHomeFeed() fetches /events/query; loadHomeWorkspace() fetches /workspaces; _relativeTime() and _escHtml() utilities
+464. ✅ Sprint 46 tests — 38 new tests: auto-updater config (6), desktop update banner (6), home dashboard HTML (12), home dashboard JS (11), API response shapes (3)
+
+### Polish & Cross-Platform Distribution — Sprint 47 (Complete ✓)
+465. ✅ Git URL validation — git_status() rejects remote URLs (http/https/git@/ssh), resolves paths via Path.resolve(), checks existence; planner redirects URLs to git.clone with approval
+466. ✅ Pretty tool output formatter — formatToolOutput() with smart renderers: process.list (table with PID/Name/CPU/Memory), filesystem.list/tree (📁/📄 icons, text-sm, sizes), filesystem.grep (file+line matches), git.status (branch badge, Material icons, color-coded diffs), git.log (commit pills), system.* (auto-fit key-value grid), JSON fallback in <pre>
+467. ✅ Larger output containers — max-h-72 (from max-h-40), text-xs/text-sm (from text-[10px]), rounded-lg borders, border border-white/5
+468. ✅ Tool click-to-chat — useToolInChat() switches to chat view, inserts tool name in Neural Link input; grid cards and sidebar list items clickable (cursor-pointer + onclick), "Use" hint on hover
+469. ✅ SQLite WAL auto-cleanup — MachinaCore._cleanup_stale_wal() removes orphaned .db-wal and .db-shm files before opening databases, preventing disk I/O errors after unclean shutdowns
+470. ✅ Cross-platform bundle_python.py — --platform flag (windows/linux/macos), python-build-standalone for Linux/macOS, platform-aware Python binary names, tar.gz extraction, pip detection
+471. ✅ Cross-platform build script — scripts/build_dist.sh (bash) for Linux/macOS with DEB/AppImage/RPM/DMG output detection, Rust PATH setup, error handling
+472. ✅ Tauri cross-platform support — Rust find_embedded_python() checks platform-specific paths (AppImage share/, macOS Resources/), cfg!(target_os) for python3 vs python.exe, 128x128@2x.png and icon.icns generated
+473. ✅ Sprint 47 tests — 42 new tests: git URL validation (8), tool output formatter (9), tool click-to-chat (6), output container sizing (3), WAL cleanup (4), cross-platform bundle (4), bash build script (4), Tauri cross-platform (6)
+
+### Template Pack & Versioning — Sprint 48 (Complete ✓)
+474. ✅ Version bump script — scripts/bump_version.py updates pyproject.toml, tauri.conf.json, Cargo.toml, package.json atomically; supports patch/minor/major/explicit
+475. ✅ 6 new chain templates — security-audit (secrets+insecure patterns), dependency-check (cross-language dep files), release-readiness (TODOs+debug+resources), onboarding-scan (README+docs+Docker+env), log-investigation (error patterns+recent commits), cleanup-sweep (stale artifacts+disk)
+476. ✅ 4 new workflow DSL templates — quick-commit (status→commit→verify), branch-and-start (status→branch→checkout→verify), find-and-fix (grep→read→diff), scaffold-module (write .py+test→tree)
+477. ✅ 5 agent blueprint templates — BUILTIN_AGENT_TEMPLATES: code-reviewer (read-only code analysis), devops (system health+git+safe shell), project-navigator (read-only exploration), security-auditor (secret/vuln scanning), release-manager (branching+tagging+changelogs)
+478. ✅ Agent template API — GET /agent-templates, POST /agents/from-template/{id} for on-demand agent creation from blueprints
+479. ✅ Agent template UI — "From Template" button in Agents view, glassmorphic template picker with capability/tool_filter badges, one-click agent instantiation
+480. ✅ Sprint 48 tests — 49 new tests: chain templates (9), workflow DSL templates (9), agent templates (9), API endpoints (8), UI elements (9), core integration (5)
+
+### Visual Workflow Studio & Template Expansion — Sprint 49 (Complete ✓)
+481. ✅ 5 new chain templates — test-suite-check (find test files/functions/configs), api-health-check (routes/config/env vars), documentation-audit (README/changelogs/doc gaps), migration-check (DB schemas/migrations/patterns), ci-cd-audit (CI configs/build scripts/Docker); total now 14
+482. ✅ 3 new agent templates — test-engineer (read-only test analysis), documentation-writer (read code + write docs), ci-cd-specialist (inspect pipelines + safe shell); total now 8
+483. ✅ Workflow Studio view — 14th view ("Studio") with three-panel layout: node palette (tools/agents/templates tabs with filter), SVG canvas (grid background, HTML nodes, SVG edges with cubic Bezier curves), properties panel (tool/agent/args/output_key/input_from/condition/branch_to/parallel_group fields)
+484. ✅ Studio node engine — node CRUD (add/delete/select/clear), canvas drag-and-drop from palette, node repositioning via mousedown/mousemove/mouseup, double-click to create empty node, Delete key to remove selected
+485. ✅ Studio edge drawing — port-to-port connection (output→input), cubic Bezier SVG paths, temp edge preview during drag, auto-set input_from when source has output_key, duplicate/self-loop prevention
+486. ✅ Studio serialization — topological sort (Kahn's algorithm) of node graph to ordered steps, studioToSteps() produces AgentWorkflowStep-compatible format, studioLoadFromChain() for bidirectional chain↔studio loading
+487. ✅ Studio operations — Save (POST /workflow-chains), Execute (POST /workflow-chains/{id}/execute), Auto-Assign (POST /auto-assign + reload), Optimize (POST /apply-optimization + reload)
+488. ✅ Studio template loading — Load chain templates and workflow DSL templates directly into canvas with auto-positioned sequential nodes and auto-connected edges
+489. ✅ Edit in Studio button — "Studio" button on existing workflow chain cards opens chain in visual editor, bidirectional editing
+490. ✅ Studio nav integration — nav tab, dock button (schema icon), Ctrl+6 shortcut, switchView('studio') → loadStudio()
+491. ✅ Sprint 49 tests — 86 new tests: chain template expansion (10), agent template expansion (8), HTML structure (13), nav integration (4), JS engine (20), state/serialization (6), edge drawing (7), canvas interaction (6), edit chain integration (2), API endpoints (5), core integration (6)
+
+### Studio UX & Template Pack — Sprint 50 (Complete ✓)
+492. ✅ 6 new chain templates — performance-profile (memory/disk/sysinfo/heavy files/tree), git-hygiene (status/branches/stash/log/gitignore), env-config-audit (env files/secrets/configs), code-quality-scan (lint suppressions/debug stmts/wildcards/diff), error-investigation (exception handlers/error raises/logs/commits/memory), license-compliance (license files/refs/copyright/attribution); total now 20
+493. ✅ 4 new agent templates — performance-analyst (system/process/filesystem tools), dependency-manager (dependencies/packages/versions/audit), infrastructure-scanner (docker/kubernetes/terraform), onboarding-guide (navigation/documentation/setup); total now 12
+494. ✅ 4 new workflow DSL templates — full-project-audit (6-step comprehensive scan), security-sweep (secrets/insecure grep/gitignore), dependency-audit (dep files/lock files/deprecated), git-cleanup (status/stash/branches/log); total now 12
+495. ✅ Studio inline help panel — collapsible "?" help guide in properties sidebar with 5 sections: Getting Started, Data Flow, Arguments, Advanced Features, Keyboard Shortcuts
+496. ✅ Studio tooltip system — info icons (ℹ️) next to every property field label with contextual help text explaining purpose, format, and examples
+497. ✅ Studio smart argument builder — replaces raw JSON textarea with dynamic form fields per tool (text inputs, number inputs, textareas, checkboxes, select dropdowns), tool-specific argument schemas covering 30+ tools, placeholder text, required field indicators, hint text
+498. ✅ Tool argument schema mapping — _TOOL_ARG_SCHEMAS object covering filesystem (7 tools), git (10 tools), shell (2 tools), system (4 tools), process (4 tools), browser (3 tools) with field types, labels, placeholders, hints, and required flags
+499. ✅ JSON/Form toggle — switchable argument editing modes: structured form fields (default) or raw JSON textarea for advanced users, preserves values between modes
+500. ✅ Data Flow section — dedicated section with Output Key and Input From fields, clickable suggestions showing available output keys from other nodes for quick wiring
+501. ✅ Collapsible Advanced Options — Condition, Branch To, and Parallel Group fields grouped under an expandable advanced section to reduce cognitive overhead, with condition format documentation inline
+502. ✅ Tool description display — selected tool's description shown below tool dropdown for quick reference without consulting documentation
+503. ✅ Sprint 50 tests — 69 new tests: chain template expansion (10), agent template expansion (8), workflow template expansion (7), help panel (7), smart arg builder (10), tooltips (8), advanced section (6), state init (4), data flow (4), core integration (5)
+
+### LLM Provider Expansion — Sprint 51 (Complete ✓)
+504. ✅ OpenRouter provider — _OPENAI_COMPAT_PROVIDERS set, PROVIDER_DEFAULTS entry, auto-detection via URL, HTTP-Referer + X-Title headers
+505. ✅ LM Studio provider — localhost:1234 auto-detection, no API key required, /v1/chat/completions endpoint
+506. ✅ GitHub Copilot provider — api.githubcopilot.com auto-detection, Editor-Version header, OpenAI-compatible API
+507. ✅ 7-provider LLM system — Ollama, OpenAI, Gemini, Claude, OpenRouter, LM Studio, GitHub Copilot all supported with provider-specific headers and auto-detection
+508. ✅ UI provider expansion — 7-entry provider dropdown, provider-specific API key placeholders, updated defaults
+
+### Security Foundation — Sprint 52 (Complete ✓)
+509. ✅ EncryptionStore — AES-256-GCM with PBKDF2 key derivation (600k iterations), SQLite-backed secrets table, per-secret nonces, fallback XOR+HMAC when cryptography unavailable
+510. ✅ CredentialScrubber — 20+ regex patterns for API keys (OpenAI, GitHub, GitLab, Slack, Google, AWS, Azure), JWTs, bearer tokens, private keys, connection strings, custom pattern/literal registration
+511. ✅ AuditLog — SOC 2-compatible immutable audit log with SHA-256 hash chains, AuditEntry model, query/count/verify_chain/export_json/summary methods
+512. ✅ SecurityAnalyzer — 14 vulnerability patterns covering SQL injection, XSS, SSRF, command injection, JWT issues, hardcoded secrets, path traversal, insecure deserialization, eval/exec; SecurityFinding model with CWE IDs
+513. ✅ Security API endpoints — secrets CRUD, code analysis, audit log query/summary/verify/export, credential scrubbing
+514. ✅ Core wiring — encryption, scrubber, audit_log, security_analyzer initialized in MachinaCore.__init__(), cleanup in close()
+
+### MCP Protocol Support — Sprint 53 (Complete ✓)
+515. ✅ MCPClient — JSON-RPC 2.0 client with stdio transport (subprocess), initialize handshake (protocol version 2024-11-05), list_tools/call_tool/list_resources/read_resource/list_prompts/get_prompt
+516. ✅ MCPToolBridge — MCP→ToolSpec conversion with mcp.<server>.<tool> namespace, inputSchema→params mapping, async-to-sync handler wrapper, MEDIUM risk
+517. ✅ MCPServerRegistry — SQLite-backed CRUD for MCP server configurations, auto_connect flag, list_enabled
+518. ✅ MCP API endpoints — list/create/delete servers, connect/disconnect, list MCP tools
+519. ✅ Core wiring — mcp_registry, mcp_bridge, _mcp_clients initialized in MachinaCore, cleanup in close()
+
+### Task Templates — Sprint 54 (Complete ✓)
+520. ✅ 9 new chain templates — code-review-deep, debug-investigation, refactoring-analysis, api-design-review, security-deep-scan, docker-k8s-review, test-coverage-analysis, documentation-review, db-optimization (total: 29 chain templates)
+521. ✅ 5 new agent templates — debugger, refactorer, api-designer, docker-engineer, db-optimizer (total: 17 agent templates)
+522. ✅ 8 new workflow templates — debug-workflow, code-review-workflow, refactor-workflow, api-review-workflow, security-scan-workflow, docker-review-workflow, test-audit-workflow, db-review-workflow (total: 20 workflow templates)
+523. ✅ Sprint 51-54 tests — 110 new tests: LLM providers (15), encryption (11), scrubbing (20), audit log (8), security analysis (11), security package (1), MCP client (7), MCP bridge (5), MCP registry (8), chain templates (5), agent templates (5), workflow templates (6), core wiring (8)
+
+### Security & MCP UI — Sprint 55 (Complete ✓)
+524. ✅ LLM provider dropdown fix — added 3 missing options (OpenRouter, LM Studio, GitHub Copilot) to Settings select, all 7 providers now visible
+525. ✅ Security Center view — dedicated 15th view with 4 sub-tabs: Secrets Vault (encrypt/store/retrieve/delete), Audit Log (query/summary/verify chain/export JSON), Vulnerability Scanner (code analysis with CWE IDs and severity badges), Credential Scrubber (text scrubbing with 20+ patterns)
+526. ✅ MCP Protocol view — dedicated 16th view with 2 sub-tabs: Server Registry (register/connect/disconnect/delete MCP servers), Discovered Tools (list all MCP tools with params and risk levels)
+527. ✅ Navigation wiring — nav tabs, command palette entries (Go to Security, Go to MCP), keyboard shortcut array expanded (Ctrl+1-9 covers 15 views)
+528. ✅ MSI build verified — 125.2 MB, bundled index.html confirmed with both new views, 2148 tests passing
+
+### GitHub Integration Decoupling — Sprint 56 (Complete ✓)
+529. ✅ GitHub decoupled from LLM — GitHub Copilot removed from LLM provider dropdown (6 providers: Ollama, OpenAI, Gemini, Claude, OpenRouter, LM Studio)
+530. ✅ GitHub Connection panel — dedicated Settings section with PAT input, Connect/Test/Disconnect buttons, status dot
+531. ✅ GitHub backend API — GET /github/status, POST /github/config, GET /github/test endpoints; token stored in preferences; validates against api.github.com/user
+532. ✅ GitHub status bar indicator — status bar shows GitHub connection status dot (green=connected, grey=not connected) with username
+533. ✅ Simultaneous connections — user can have GitHub connected AND a separate LLM provider active at the same time
+
+### CI/CD Pipeline — Sprint 57 (Complete ✓)
+533. ✅ GitHub Actions CI workflow — `.github/workflows/ci.yml`: Python tests (Ubuntu + Windows matrix), ruff lint, Rust fmt + cargo check on every push/PR to main/develop
+534. ✅ GitHub Actions Release workflow — `.github/workflows/release.yml`: matrix build (windows-latest MSI+NSIS, ubuntu-22.04 DEB+AppImage, macos-latest DMG x64+arm64) triggered on `v*` tags via `tauri-apps/tauri-action@v0`; TAURI_SIGNING_PRIVATE_KEY wired for updater signatures; draft release with per-platform installer table
+535. ✅ Auto-updater manifest generator — `scripts/generate_update_manifest.py`: post-build job fetches `.sig` assets from draft release, builds Tauri-compatible `latest.json` with platform→{signature,url} map, uploads to release
+536. ✅ Release workflow auto-updater job — dedicated `update-manifest` job runs after all platform builds complete, uploads `latest.json` matching `tauri.conf.json` updater endpoint path
+
+### Template & Tool Expansion — Sprint 58 (Complete ✓)
+537. ✅ `filesystem.copy` — copy file or directory tree (MEDIUM risk, overwrite guard, workspace-bounded)
+538. ✅ `filesystem.mkdir` — create directory tree like `mkdir -p` (LOW risk, workspace-bounded)
+539. ✅ `git.tag` — list/create/delete git tags with optional annotation message (MEDIUM risk)
+540. ✅ `git.merge` — merge a branch into current branch, `--no-ff` support (HIGH risk)
+541. ✅ `system.env` — read environment variables with automatic sensitive-key redaction (20+ patterns, LOW risk)
+542. ✅ 6 new chain templates — `hotfix-workflow`, `pr-readiness-check`, `changelog-generation`, `monorepo-scan`, `stale-branch-cleanup`, `feature-branch-setup` (total: 35 chain templates)
+543. ✅ 4 new agent templates — `frontend-analyst` (HTML/CSS/JS read-only), `sre-agent` (system+process monitoring), `changelog-writer` (git→CHANGELOG.md), `data-engineer` (data pipeline + ETL) (total: 21 agent templates)
+544. ✅ 4 new workflow DSL templates — `hotfix` (grep→read→status→diff), `release-cut` (status→log→tags→disk), `test-and-commit` (status→diff→shell→commit), `feature-start` (status→branch→log→tree) (total: 24 workflow templates)
+
+### Agent Delegation Hardening — Sprint 59 (Complete ✓)
+545. ✅ Intake delegation parsing fix — `agent_name` now captures only the first word after the delegation prefix; remaining text stored as `delegate_task` entity (e.g. "ask agent git to show status" → agent_name="git", delegate_task="show status")
+546. ✅ Planner delegation tool selection — keyword→tool map per agent prefix (git/filesystem/system/shell/process); sorted by keyword length to avoid partial matches; `task_text_raw` preserves original case for grep queries
+547. ✅ Planner delegation argument safety — tool-specific argument building: `filesystem.*` → `path`; `git.*` → `cwd` (+ `limit` for git.log); `system.disk` → `path`; `system.info/memory/status` → no args; `process.*` → no args; eliminates spurious `cwd` on system tools
+548. ✅ Planner filesystem.grep argument extraction — regex parses "grep QUERY in PATH" from task text preserving case; fallback extracts first non-"grep" word as query
+549. ✅ Planner delegation fallback improvement — when agent not found, re-parses `delegate_task` as standalone intent and runs it directly; error message lists available agents instead of echoing task
+550. ✅ `formatToolOutput` tool-name-first dispatch — `filesystem.grep`, `system.disk`, `system.memory`, `system.info` checked by tool name before structural pattern matching; eliminates renderer hijacking by structurally similar outputs
+551. ✅ `filesystem.grep` renderer — groups matches by file, shows short filename (last 2 path segments), line numbers, match text; handles both dict `{matches, files_searched}` and raw array formats
+552. ✅ `system.disk` renderer — 2-column card grid with Free/Used GB, visual progress bar for percent used
+553. ✅ `system.memory` renderer — 2-column card grid with Available/Used GB
+554. ✅ `system.info` renderer — 2×2 grid showing OS, CPUs, Python version, hostname
+555. ✅ Studio arg schema fix — `filesystem.grep` field name corrected from `pattern` → `query` in `_TOOL_ARG_SCHEMAS`
+556. ✅ UI cache-busting — `Cache-Control: no-store, no-cache, must-revalidate` headers on `/` route prevent browser from serving stale `index.html`
+557. ✅ DEMO_STORYBOARD_V6.md agent execution section rewrite — replaced code-snippet-heavy reference with step-by-step prose instructions for all 5 methods; decision matrix updated
+
+### Studio Debug, Chain Persistence & Hardening — Sprint 60 (Complete ✓)
+558. ✅ Studio JSON-in-form-field detection — `studioUpdateArgField()` detects pasted JSON objects, matches keys to tool schema fields, auto-distributes into individual form inputs
+559. ✅ Output bridging argument safety — `_bridge_step_input()` uses `setdefault` for `path` key instead of hard overwrite, preserving step's own configured arguments
+560. ✅ Tool invocation argument filtering — `inspect.signature()` introspection in `ToolRegistry.invoke()` filters to only accepted parameter names, preventing `_prior_output` and bridged keys from crashing tools
+561. ✅ Execution results window enlargement — Studio results tray `max-h-[50vh]`, individual outputs `max-h-72`, popup `max-h-[60vh]` with `max-w-lg`
+562. ✅ Studio Open Chain picker — `studioOpenChain()` glassmorphic modal with chain list (step counts, agent names), loads into visual editor via `studioEditChain()`
+563. ✅ Studio Debug Execution — `studioDebugExecute()` SSE-streaming step-by-step execution with live canvas node visuals (amber pulsing=running, green ✓=success, red ✗=failed, gray ⊘=skipped), incremental results tray with duration metrics
+564. ✅ Debug execution SSE endpoint — `POST /workflow-chains/{id}/execute-debug` streams `step_start`, `step_done`, `done` events with condition evaluation, output bridging, and break-on-failure
+565. ✅ Canvas node debug state rendering — `_debugStatus` property per node with visual overlays: pulsing amber border+spinner (running), green glow+✓ badge (success), red glow+✗ badge (failed), dimmed ⊘ badge (skipped)
+566. ✅ ChainStore SQLite persistence — WAL-mode SQLite (chains.db) with full CRUD: save, load, load_all, delete, exists; mirrors AgentStore pattern
+567. ✅ AgentBus chain persistence — `chain_store` parameter, auto-persist on create/update/rollback/delete, `_load_persisted_chains()` restores chains on startup
+568. ✅ MachinaCore chain store wiring — creates `ChainStore(data_dir / "chains.db")`, passes to AgentBus, closes on shutdown
+569. ✅ DEMO_STORYBOARD_V7.md — updated storyboard with chain persistence, debug execution, realistic Pre-Commit Health Check example
+
+### Next Priorities
+- Set up repository secrets: `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (run `npx tauri signer generate`)
+- Update updater endpoint in `tauri.conf.json` from placeholder to real GitHub repo URL
+- Tag a release (`git tag v0.2.1 && git push --tags`) to trigger first automated build
+
+---
+
+## First Milestone — Machina Seed ✓ ACHIEVED
+
+The system can:
+- ✅ Interpret a simple request (LLM-assisted or heuristic fallback)
+- ✅ Create a structured plan with typed steps
+- ✅ Execute 3–5 tool steps safely with policy checks
+- ✅ Show the full execution trace (events view + timeline)
+- ✅ Recover from failed steps (executor handles errors per-step)
+- ✅ Reopen the same project context (project resume via `/resume`)
+
+**2148 tests passing. 569 build items complete.**
+
+---
+
+## Architecture Bias
+When design tradeoffs appear, prefer:
+- inspectability over opacity
+- local execution over remote dependence
+- tool truth over model narration
+- constraints over hype
+- reliable narrow competence over broad fake competence
+
+---
+
+## Notes for Contributors
+This project is trying to make operating environments more intent-native, not just add a chatbot to a desktop.
+
+Whenever you build a feature, ask:
+- Does this increase real capability?
+- Is the behavior inspectable?
+- Can the user trust what happened?
+- Would this still be useful if the model were imperfect?
+
+If the answer is no, redesign it.
+
+---
+
+## Canonical One-Sentence Summary
+**Machina OS is a local-first, intent-driven operating layer that turns natural-language goals into safe, inspectable system actions.**

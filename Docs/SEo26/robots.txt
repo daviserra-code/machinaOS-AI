@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Exclude placeholder and utility paths from crawl
+Disallow: /pricing.html
+
+Sitemap: https://machinaos.ai/sitemap.xml

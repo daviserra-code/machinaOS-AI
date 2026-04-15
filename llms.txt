@@ -1,0 +1,28 @@
+# MachinaOS
+
+> Local-first intent runtime for governed AI agent orchestration.
+
+## About
+MachinaOS is an intent-native orchestration layer that converts natural-language goals
+into structured, multi-step agentic workflows with human approval checkpoints.
+Built for developers needing local-first, traceable AI execution.
+
+## Key Capabilities
+- Heuristic intent routing
+- Planner/executor separation with governed execution
+- Multi-agent delegation with scoped permissions
+- Persistent local memory layers
+- Human approval gates for risky operations
+
+## Pricing
+- Free: Single local runtime
+- Intelligence: $49/mo — multi-agent workflows
+- Enterprise: Custom — distributed agent mesh
+
+## Resources
+- Features: https://machinaos.ai/features.html
+- User Stories: https://machinaos.ai/user-stories.html
+- Demo Guide: https://machinaos.ai/demo-guide.html
+
+## Company
+MachinaOS is built by Machina Intelligence — https://machina-intelligence.com

@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Exclude placeholder and utility paths from crawl
+Disallow: /pricing.html
+Disallow: /ops-console-8c7f43d1.html
+
+Sitemap: https://machinaos.ai/sitemap.xml
+
+# AI training crawlers — block to retain content rights
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# AI search indexing — allow for product discovery
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
