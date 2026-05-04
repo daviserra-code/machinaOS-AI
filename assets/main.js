@@ -158,51 +158,12 @@ function initScreenFilters() {
 
 function initDemoDialog() {
   const triggers = Array.from(document.querySelectorAll("[data-demo-trigger]"));
-
-  if (!triggers.length) {
-    return;
-  }
-
-  const dialog = document.createElement("dialog");
-  dialog.className = "demo-dialog";
-  dialog.innerHTML = `
-    <div class="demo-dialog-panel">
-      <div class="demo-dialog-head">
-        <div>
-          <div class="demo-dialog-kicker">Live demo</div>
-          <h2 class="demo-dialog-title">Demo <strong>Launching Soon</strong></h2>
-        </div>
-        <form method="dialog">
-          <button class="btn btn-ghost" value="close" aria-label="Close">Close</button>
-        </form>
-      </div>
-      <p class="demo-dialog-copy">
-        The live MachinaOS demo is being deployed at <strong>demo.machinaos.ai</strong>. It will be available with no signup, no API key, and no installation required &mdash; a private 30-minute session running on our own hardware.
-      </p>
-      <div class="demo-dialog-card">
-        <strong>What to expect</strong>
-        <div>Workflow Studio, Studio Debugger, Chain Composition, Agent Communication Graph, MCP integration, and Neural Link chat &mdash; all live on Ollama &middot; llama3.1:8b.</div>
-      </div>
-      <div class="demo-dialog-actions">
-        <a class="btn btn-demo" href="demo-guide.html">Read the Demo Guide</a>
-        <a class="btn btn-ghost" href="screens.html">Browse Screens</a>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(dialog);
-
+  if (!triggers.length) return;
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", (event) => {
       event.preventDefault();
-      dialog.showModal();
+      window.open("https://demo.machinaos.ai/demo/start", "_blank", "noopener,noreferrer");
     });
-  });
-
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) {
-      dialog.close();
-    }
   });
 }
 
