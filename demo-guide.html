@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MachinaOS Demo Guide | Local Runtime Setup</title>
+    <title>MachinaOS Live Demo — Try It Now, No Setup Required</title>
     <meta
       name="description"
-      content="Follow a preliminary MachinaOS onboarding flow: start the runtime, register a workspace, apply policy profile, and run your first inspectable plan before final protocol release."
+      content="Try the MachinaOS live demo instantly at demo.machinaos.ai. No account, no API key, no install. A private 30-minute session running Ollama llama3.1:8b on our server."
     />
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="MachinaOS Demo Guide | Local Runtime Setup" />
-    <meta property="og:description" content="Step-by-step guide to setting up MachinaOS: initialize the local runtime, map workspace context, and run your first governed AI goal." />
+    <meta property="og:title" content="MachinaOS Live Demo — Try It Now, No Setup Required" />
+    <meta property="og:description" content="Try the MachinaOS live demo instantly. No account, no API key, no install — a private 30-minute session running Ollama on our server." />
     <meta property="og:url" content="https://machinaos.ai/demo-guide.html" />
     <meta property="og:site_name" content="MachinaOS" />
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MachinaOS Demo Guide | Local Runtime Setup" />
-    <meta name="twitter:description" content="Get started with MachinaOS: local runtime setup guide." />
+    <meta name="twitter:title" content="MachinaOS Live Demo — Try It Now, No Setup Required" />
+    <meta name="twitter:description" content="Try the MachinaOS live demo instantly. No account, no API key, no install." />
     <meta property="og:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -79,7 +79,7 @@
           <a data-nav href="about.html">About</a>
           <a data-nav href="contact.html">Contact</a>
           <a data-nav href="links.html">Links</a>
-          <a class="btn btn-demo" href="demo-guide.html" data-demo-trigger>Launch Demo</a>
+          <a class="btn btn-demo" href="https://demo.machinaos.ai/demo/start" target="_blank" rel="noopener noreferrer" data-demo-trigger>Launch Demo</a>
         </nav>
         <button class="btn btn-ghost mobile-toggle" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu">Menu</button>
       </div>
@@ -98,10 +98,98 @@
 
     <main class="site-wrap">
       <section class="section reveal">
-        <span class="kicker">System Initialization</span>
-        <h1>Activation <strong>Protocol</strong></h1>
-        <p class="lead">A practical preliminary onboarding flow to move from zero setup to your first approved, traceable intent execution — on the desktop app or via the local API.</p>
-        <p class="lead">This is an early activation protocol preview, not the final production onboarding sequence.</p>
+        <span class="kicker">Live Demo · Online Now</span>
+        <h1>Try <strong>MachinaOS</strong> — No Setup Required</h1>
+        <p class="lead">A real MachinaOS instance is running on our server at <strong>demo.machinaos.ai</strong>. Click below to start a private 30-minute session — no account, no API key, no installation needed.</p>
+        <p class="lead">Powered by <strong>Ollama · llama3.1:8b</strong> running on our own hardware. Nothing leaves our box.</p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
+          <a class="btn btn-demo" href="https://demo.machinaos.ai/demo/start" target="_blank" rel="noopener noreferrer">Launch Live Demo →</a>
+          <a class="btn btn-ghost" href="https://demo.machinaos.ai/demo/start?prefill=code-review" target="_blank" rel="noopener noreferrer">Try: Code Review</a>
+          <a class="btn btn-ghost" href="https://demo.machinaos.ai/demo/start?prefill=security-sweep" target="_blank" rel="noopener noreferrer">Try: Security Audit</a>
+          <a class="btn btn-ghost" href="https://demo.machinaos.ai/demo/start?prefill=daily-brief" target="_blank" rel="noopener noreferrer">Try: Daily Brief</a>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><h2>Demo Ground Rules</h2></div>
+        <div class="card-grid">
+          <article class="card col-4">
+            <h3>Your Session</h3>
+            <ul>
+              <li><strong>30 minutes</strong> per anonymous session — a countdown badge is shown in the top bar.</li>
+              <li>Extend once by +15 min (up to 60 min total) via the badge's <strong>Extend</strong> button.</li>
+              <li>Use <strong>Reset Workspace</strong> at any time to wipe your sandbox and start fresh.</li>
+              <li>Each session gets its own isolated workspace — other visitors cannot see your work.</li>
+            </ul>
+          </article>
+          <article class="card col-4">
+            <h3>What Works in the Demo</h3>
+            <ul>
+              <li><strong>Filesystem</strong> — browse, read, and write files inside your private sandbox.</li>
+              <li><strong>Git</strong> — read-only: <code>status</code>, <code>log</code>, <code>diff</code> against the seed workspace.</li>
+              <li><strong>Workflow Studio</strong> — build, run, and debug pipelines; step through with the Debugger.</li>
+              <li><strong>Chain Composition</strong> — compose multi-step chains from 35+ templates.</li>
+              <li><strong>Agent Fleet</strong> — run multi-agent workflows; inspect the Communication Graph.</li>
+              <li><strong>MCP Servers</strong> — <code>fetch</code>, <code>memory</code>, <code>sequential-thinking</code>, and <code>demo</code> are pre-connected.</li>
+              <li><strong>Notes &amp; Memory</strong> — create and read notes within your session.</li>
+              <li><strong>Neural Link chat</strong> — converse with the runtime; plans, tool calls, and timelines are shown.</li>
+            </ul>
+          </article>
+          <article class="card col-4">
+            <h3>Demo Limits</h3>
+            <ul>
+              <li><strong>Shell is blocked</strong> — <code>shell.run</code> and <code>process.stop</code> are disabled for safety.</li>
+              <li><strong>LLM settings are read-only</strong> — the demo runs a fixed <strong>Ollama · llama3.1:8b</strong> model; the Settings → LLM panel shows a lock badge.</li>
+              <li><strong>No new MCP servers</strong> — you can use the four pre-registered servers but cannot register additional ones.</li>
+              <li><strong>Filesystem stays sandboxed</strong> — all file operations are scoped to your private session directory. Destructive deletes are blocked.</li>
+              <li><strong>No GitHub PAT</strong> — the GitHub Settings panel is hidden in demo mode.</li>
+              <li><strong>Token budget</strong> — to keep the shared server fair, each session has a generous LLM token ceiling. A banner appears if it is reached; click Reset to continue.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><h2>Quick-Start Scenarios</h2></div>
+        <p class="lead">Use these deep-links to land directly in a pre-loaded workflow — no setup steps required.</p>
+        <div class="card-grid">
+          <article class="card col-4">
+            <h3>Code Review</h3>
+            <p>Lands in the Studio with a <em>Code Review</em> chain pre-loaded against the seed workspace. MachinaOS will analyse the files, flag issues, and produce a structured report.</p>
+            <a class="btn btn-demo" href="https://demo.machinaos.ai/demo/start?prefill=code-review" target="_blank" rel="noopener noreferrer">Start Code Review →</a>
+          </article>
+          <article class="card col-4">
+            <h3>Security Audit</h3>
+            <p>Triggers the <em>Security Sweep</em> composite chain — scans files for common vulnerabilities, cross-references the tool registry, and outputs a Production Readiness report.</p>
+            <a class="btn btn-demo" href="https://demo.machinaos.ai/demo/start?prefill=security-sweep" target="_blank" rel="noopener noreferrer">Start Security Audit →</a>
+          </article>
+          <article class="card col-4">
+            <h3>Daily Brief</h3>
+            <p>Runs the <em>Daily Brief</em> chain — summarises recent Git activity, open issues, and outstanding tasks in the seed workspace and delivers a concise morning report.</p>
+            <a class="btn btn-demo" href="https://demo.machinaos.ai/demo/start?prefill=daily-brief" target="_blank" rel="noopener noreferrer">Start Daily Brief →</a>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><h2>Need Longer or Deeper Access?</h2></div>
+        <div class="card-grid">
+          <article class="card col-6">
+            <h3>Reviewer Token (24 h)</h3>
+            <p>Technical evaluators and integration partners can request a <strong>24-hour reviewer session</strong>. Reviewer mode unlocks additional capabilities — including browser introspection and extended note persistence — while keeping the shared-infrastructure safety boundaries in place.</p>
+            <p><a href="contact.html">Contact us</a> with your name and use-case and we will send a redeem link.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Press &amp; Investor Token (7 d)</h3>
+            <p>Journalists and investors covering MachinaOS can request a <strong>7-day extended session</strong> for in-depth evaluation. The same safety boundaries apply; you get a persistent workspace across multiple visits.</p>
+            <p><a href="contact.html">Contact us</a> and reference "press" or "investor" in your message.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><h2>Run MachinaOS on Your Own Machine</h2></div>
+        <p class="lead">The live demo runs on our shared server with sandboxed restrictions. For full capabilities — your own LLM provider, your real workspace, unrestricted shell — install MachinaOS locally.</p>
       </section>
 
       <section class="section reveal">
@@ -171,8 +259,8 @@ Model:    llama3</pre>
       </section>
 
       <section class="cta reveal">
-        <h3>Complete sync</h3>
-        <p class="lead">When setup is done, run your first goal and review plan preview, approvals, tool outputs, and timeline. Try the guided tour in demo mode for a curated walkthrough.</p>
+        <h3>Ready to run</h3>
+        <p class="lead">When setup is done, run your first goal and review the plan preview, approvals, tool outputs, and timeline — all on your own machine with full capabilities.</p>
         <pre class="code-block">machina run "Prepare my development environment for Project X"</pre>
       </section>
 

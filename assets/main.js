@@ -158,51 +158,12 @@ function initScreenFilters() {
 
 function initDemoDialog() {
   const triggers = Array.from(document.querySelectorAll("[data-demo-trigger]"));
-
-  if (!triggers.length) {
-    return;
-  }
-
-  const dialog = document.createElement("dialog");
-  dialog.className = "demo-dialog";
-  dialog.innerHTML = `
-    <div class="demo-dialog-panel">
-      <div class="demo-dialog-head">
-        <div>
-          <div class="demo-dialog-kicker">Demo status</div>
-          <h2 class="demo-dialog-title">Demo <strong>Coming Soon</strong></h2>
-        </div>
-        <form method="dialog">
-          <button class="btn btn-ghost" value="close" aria-label="Close demo status">Close</button>
-        </form>
-      </div>
-      <p class="demo-dialog-copy">
-        The interactive MachinaOS demo is still being finalized. We are polishing the flows so the public preview reflects the actual product quality.
-      </p>
-      <div class="demo-dialog-card">
-        <strong>What to expect</strong>
-        <div>Live orchestration screens, guided workflows, and a production-grade walkthrough will be available soon.</div>
-      </div>
-      <div class="demo-dialog-actions">
-        <a class="btn btn-demo" href="screens.html">Browse Screens</a>
-        <a class="btn btn-ghost" href="demo-guide.html">Open Demo Guide</a>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(dialog);
-
+  if (!triggers.length) return;
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", (event) => {
       event.preventDefault();
-      dialog.showModal();
+      window.open("https://demo.machinaos.ai/demo/start", "_blank", "noopener,noreferrer");
     });
-  });
-
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) {
-      dialog.close();
-    }
   });
 }
 
