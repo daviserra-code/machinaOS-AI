@@ -18,6 +18,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MachinaOS User Stories | Real Workflows, Real Execution" />
     <meta name="twitter:description" content="Real developer workflows with governed AI execution." />
+    <meta property="og:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MachinaOS — Local-First Intent Runtime for governed AI agent orchestration" />
+    <meta name="twitter:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
     <link rel="canonical" href="https://machinaos.ai/user-stories.html" />
     <script type="application/ld+json">
     {
@@ -72,7 +77,7 @@
 
       <!-- Flagship stories -->
       <section class="section reveal">
-        <div class="section-head"><span>Flagship Stories</span></div>
+        <div class="section-head"><h2>Flagship Stories</h2></div>
         <div class="card-grid">
 
           <article class="card col-12">
@@ -125,7 +130,7 @@
 
       <!-- Extended stories -->
       <section class="section reveal">
-        <div class="section-head"><span>Extended Stories</span></div>
+        <div class="section-head"><h2>Extended Stories</h2></div>
         <div class="card-grid">
 
           <article class="card col-6">
@@ -217,7 +222,7 @@
             <p><em>As a security-conscious developer, I want to scan my codebase for vulnerabilities and ensure secrets never leak into logs.</em></p>
             <p class="card-prompt">"Run a security scan on this repo and check for hardcoded secrets."</p>
             <ul>
-              <li>Runs the built-in security-deep-scan chain template</li>
+              <li>Runs the built-in security-deep-scan chain template (part of the <a href="features.html#faq">Security Center</a>)</li>
               <li>Detects SQL injection, XSS, SSRF, command injection, and 10 more patterns with CWE IDs</li>
               <li>Scrubs API keys, JWTs, and connection strings from all outputs before display</li>
               <li>Stores findings in the immutable audit log with SHA-256 hash chain</li>
@@ -231,7 +236,7 @@
             <p><em>As a platform engineer, I want to design a multi-agent data pipeline visually and deploy it without writing orchestration code.</em></p>
             <p class="card-prompt">"Build a pipeline that scans dependencies, checks for outdated packages, and opens a PR summary."</p>
             <ul>
-              <li>Opens Visual Workflow Studio on a blank canvas</li>
+              <li>Opens <a href="features.html">Visual Workflow Studio</a> on a blank canvas</li>
               <li>Drags tools from the palette and wires output ports to input ports</li>
               <li>Clicks Auto-Assign to score and assign the best agents per step</li>
               <li>Runs Optimize to detect parallelism opportunities and annotate the graph</li>
@@ -240,12 +245,87 @@
             <p class="card-outcome"><strong>Outcome:</strong> Complex multi-agent pipelines are designed in minutes, not hours, with no YAML or orchestration DSL required.</p>
           </article>
 
+          <article class="card col-6">
+            <span class="kicker">Story 12</span>
+            <h3>Step-Through Pipeline Debugging</h3>
+            <p><em>As an automation engineer, I want to debug a failing chain one step at a time and see exactly where it breaks.</em></p>
+            <p class="card-prompt">"Open my deploy-readiness chain in the Studio Debugger and step through it."</p>
+            <ul>
+              <li>Loads the saved chain in the Studio canvas via <strong>Open Chain</strong></li>
+              <li>Clicks <strong>Debug</strong> to spin up a server-side debug session</li>
+              <li>Uses Step Over to advance one node at a time \u2014 amber pulse while running, green \u2713 on success, red \u2717 on failure</li>
+              <li>Inspects per-step duration metrics and tool output in the resizable results tray</li>
+              <li>Clicks Continue to drain the remaining steps after the bad one is fixed</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Pipeline failures become inspectable like a stack trace, not a black box \u2014 the failing step is visible on the canvas with its full output.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 13</span>
+            <h3>Composite Audit in One Click</h3>
+            <p><em>As an engineering lead before a release cut, I want a single button that runs security, dependency, and code-quality audits and produces one consolidated note.</em></p>
+            <p class="card-prompt">"Run the Master Audit composite chain on this workspace."</p>
+            <ul>
+              <li>Picks the <strong>Master Audit (Composite)</strong> template from the Studio Tmpl tab</li>
+              <li>The bus auto-instantiates three sub-chains \u2014 security-audit, dependency-check, code-quality-scan \u2014 and wires their real IDs into the parent</li>
+              <li>Click Execute: each sub-chain expands recursively (depth limit 5, cycle detection) into its child steps</li>
+              <li>Final step writes a Markdown note under <code>notes/</code> consolidating all findings</li>
+              <li>Each sub-chain can also be re-run, edited, or rolled back independently</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Reusable audit chains compose into product-grade workflows. The output is a permanent, indexable artifact \u2014 not a chat reply.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 14</span>
+            <h3>Inspecting Agent Coordination</h3>
+            <p><em>As an SRE running a multi-agent task, I want to see exactly which agents talked to each other and why.</em></p>
+            <p class="card-prompt">"Show me the agent communication graph for the last release-readiness run."</p>
+            <ul>
+              <li>Opens the <strong>Agents \u2192 Communications</strong> sub-tab</li>
+              <li>The SVG graph shows agent nodes connected by color-coded edges \u2014 cyan requests, amber negotiations, purple handoffs, emerald broadcasts \u2014 each labeled with message counts</li>
+              <li>Stats cards summarize total messages, negotiations, pending requests, and active collaborations</li>
+              <li>The unified activity feed lists every event chronologically with type filters</li>
+              <li>The Threads toggle groups related messages by correlation_id into collapsible cards</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Multi-agent behavior becomes auditable. You can answer questions like "why did the security agent take over from the git agent?" with one screen.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 15</span>
+            <h3>MCP \u2014 Connect Anything, Expose Everything</h3>
+            <p><em>As a developer using Claude Desktop and Cursor, I want MachinaOS to both consume external MCP tools and expose its own tools to those clients.</em></p>
+            <p class="card-prompt">"Connect a custom MCP filesystem server, then point Cursor at MachinaOS as an MCP server."</p>
+            <ul>
+              <li>Opens <strong>MCP \u2192 Servers</strong> and uses Quick Pick to register a curated server in two clicks</li>
+              <li>Smart auto-detection fills command, args, and env hints based on package name</li>
+              <li>Discovered tools appear namespaced as <code>mcp.&lt;server&gt;.&lt;tool&gt;</code> and are usable from chat, Studio, and chains</li>
+              <li>Simultaneously, MachinaOS exposes 52 native tools, 17 resources, and 4 prompt templates over its own SSE transport at <code>/mcp/serve/sse</code></li>
+              <li>External clients (Claude Desktop, Cursor) connect and call MachinaOS tools as if they were native</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> MachinaOS becomes the central hub of an agent ecosystem \u2014 both consuming and providing capabilities through the same open protocol.</p>
+          </article>
+
+          <article class="card col-6">
+            <span class="kicker">Story 16</span>
+            <h3>Conversational Delegation via Neural Link</h3>
+            <p><em>As a developer, I want to type my intent in plain English and have MachinaOS pick the right specialist agent and run a verified plan.</em></p>
+            <p class="card-prompt">"Delegate to security-auditor and scan this project for leaked secrets."</p>
+            <ul>
+              <li>Types intent in the enhanced <strong>Neural Link</strong> chat surface</li>
+              <li>The planner sees each agent's system prompt and routes the task to the correct specialist (here: <code>delegate_to: agent_security-auditor</code>)</li>
+              <li>RAG-augmented context (ChromaDB) injects relevant code snippets into the LLM prompt</li>
+              <li>Plan card streams in with per-step tool selection, approval gates for risky operations, and live tool output</li>
+              <li>Risky steps pause for explicit human approval before execution</li>
+            </ul>
+            <p class="card-outcome"><strong>Outcome:</strong> Natural language becomes the primary control surface \u2014 with planning, policy, approvals, and traceable execution behind every sentence.</p>
+          </article>
+
         </div>
       </section>
 
       <!-- Best fit -->
       <section class="section reveal">
-        <div class="section-head"><span>Best-Fit Sectors</span></div>
+        <div class="section-head"><h2>Best-Fit Sectors</h2></div>
         <div class="card-grid">
           <article class="card col-4">
             <h3>Developer Tools / DevEx</h3>
@@ -276,7 +356,7 @@
 
       <section class="cta reveal">
         <h3>See it in action</h3>
-        <p class="lead">Walk through a real execution flow in the guided demo sandbox.</p>
+        <p class="lead">Walk through a real execution flow in the guided demo sandbox. See the full <a href="features.html">features list</a> for all runtime capabilities.</p>
         <a class="btn btn-primary" href="demo-guide.html">Open Demo Guide</a>
       </section>
 

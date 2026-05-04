@@ -18,6 +18,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MachinaOS Features | Planning, Policy, Execution" />
     <meta name="twitter:description" content="Governed AI execution with planning, policy gates, and human approval." />
+    <meta property="og:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MachinaOS — Local-First Intent Runtime for governed AI agent orchestration" />
+    <meta name="twitter:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
     <link rel="canonical" href="https://machinaos.ai/features.html" />
     <script type="application/ld+json">
     {
@@ -26,6 +31,44 @@
       "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://machinaos.ai/"},
         {"@type": "ListItem", "position": 2, "name": "Features", "item": "https://machinaos.ai/features.html"}
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What does \"intent-native\" mean?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Intent-native means the system is designed from the ground up to accept natural-language goals and convert them into structured, validated plans. MachinaOS has a dedicated planning layer that decomposes goals into steps, assigns tools, checks policies, and records outcomes as first-class runtime objects." }
+        },
+        {
+          "@type": "Question",
+          "name": "How is MachinaOS different from LangChain, AutoGen, or CrewAI?",
+          "acceptedAnswer": { "@type": "Answer", "text": "LangChain, AutoGen, and CrewAI are frameworks and libraries — you build orchestration logic in code. MachinaOS is a runtime layer that ships as a desktop application with a native UI, visual workflow studio, security center, and audit log. You interact with it through natural language or the visual canvas, not YAML files or Python glue code. It also runs fully locally with no cloud infrastructure dependency." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does MachinaOS run fully locally?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. The runtime, planner, tool registry, memory system, secrets vault, and audit log all run on your local machine. Ollama can be used as a fully local LLM provider with zero network calls. Cloud LLM providers are opt-in." }
+        },
+        {
+          "@type": "Question",
+          "name": "Which LLM providers does MachinaOS support?",
+          "acceptedAnswer": { "@type": "Answer", "text": "MachinaOS supports seven LLM providers: Ollama (fully local), OpenAI, Google Gemini, Anthropic Claude, OpenRouter, LM Studio, and a configurable custom endpoint. You can hot-reconfigure the active provider from Settings without restarting the runtime." }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the policy gate and approval system?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The policy gate evaluates every proposed step against a risk profile before execution. Destructive operations trigger an approval requirement — the runtime pauses and presents the plan for human review. You can approve, deny, modify, or request an explanation for any step. All decisions are recorded in the immutable audit log." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is MachinaOS open source?",
+          "acceptedAnswer": { "@type": "Answer", "text": "MachinaOS is currently in pre-release. Licensing and open-source plans will be announced with the v1.0 public launch." }
+        }
       ]
     }
     </script>
@@ -64,13 +107,13 @@
 
     <main class="site-wrap">
       <section class="section reveal">
-        <span class="kicker">Sprint 60 — 2,148 Tests Passing</span>
+        <span class="kicker">v0.2.0 · Sprint 64 · 1,964 Tests Passing</span>
         <h1>Neural <strong>Architecture</strong></h1>
-        <p class="lead">A layered runtime where intent intake, planning, policy, execution, and tool adapters are separated for reliability — now shipping as a native desktop application.</p>
+        <p class="lead">A layered runtime where intent intake, planning, policy, execution, and tool adapters are separated for reliability — now shipping as a native desktop application with a visual pipeline studio, multi-agent communication graph, and full MCP integration.</p>
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Core Runtime</span></div>
+        <div class="section-head"><h2>Core Runtime</h2></div>
         <div class="card-grid">
           <article class="card col-6">
             <h3>Neural Indexing</h3>
@@ -92,7 +135,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Desktop Application</span></div>
+        <div class="section-head"><h2>Desktop Application</h2></div>
         <div class="card-grid">
           <article class="card col-8">
             <h3>Native Desktop Shell — Windows, Linux, macOS</h3>
@@ -103,8 +146,8 @@
             <p>Built-in updater plugin checks GitHub Releases on startup, displays an install banner, and applies updates with a single click — no manual download required.</p>
           </article>
           <article class="card col-6">
-            <h3>16 Integrated Views</h3>
-            <p>Chat, Tools, Explorer, Processes, Agents, Studio, Metrics, Events, Settings, Security, MCP, and more — all accessible via keyboard shortcuts Ctrl+1–9 and a fuzzy Command Palette (Ctrl+K).</p>
+            <h3>14 Integrated Views</h3>
+            <p>Dashboard, Chat, Tools, Memory, Workflows, Studio, Agents, Timeline, Explorer, Processes, Metrics, Events, Settings, Security, MCP — all accessible via keyboard shortcuts Ctrl+1–9 and a fuzzy Command Palette (Ctrl+K).</p>
           </article>
           <article class="card col-6">
             <h3>System Status Bar</h3>
@@ -114,33 +157,41 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Visual Workflow Studio</span></div>
+        <div class="section-head"><h2>Visual Workflow Studio</h2></div>
         <div class="card-grid">
           <article class="card col-8">
             <h3>Drag-and-Drop Pipeline Canvas</h3>
-            <p>Build multi-agent pipelines visually on an SVG canvas with a grid background. Drag tools and agents from a searchable palette, reposition nodes freely, connect output ports to input ports with cubic Bezier edges, and load any of 35+ built-in chain templates directly onto the canvas.</p>
+            <p>Build multi-agent pipelines visually on an SVG canvas with a grid background. Drag tools and agents from a searchable palette, reposition nodes freely, connect output ports to input ports with cubic Bezier edges, and load any of 35 built-in chain templates directly onto the canvas. Mouse-wheel zoom (15–200%), pan toggle, fit-view, and shift-drag pan keep large pipelines navigable.</p>
           </article>
           <article class="card col-4">
             <h3>Smart Argument Builder</h3>
-            <p>Per-tool argument schemas replace raw JSON with structured form fields — text, number, textarea, checkbox, and select — covering 30+ tools with placeholder text, required indicators, and inline hints.</p>
+            <p>Per-tool argument schemas replace raw JSON with structured form fields — text, number, textarea, checkbox, and select — covering 30+ native tools with placeholder text, required indicators, and inline hints. MCP tools generate fields dynamically from their ToolSpec.</p>
           </article>
-          <article class="card col-4">
-            <h3>Live Debug Execution</h3>
-            <p>SSE-streaming step-by-step execution overlays each canvas node with real-time state: amber pulsing (running), green glow with ✓ badge (success), red glow with ✗ badge (failed), and dimmed ⊘ badge (skipped).</p>
+          <article class="card col-6">
+            <h3>Studio Debugger — Step-by-Step Execution</h3>
+            <p>Server-side debug sessions with a Step Over / Continue / Stop toolbar. Each canvas node animates in real time: amber pulsing border with spinner while running, green glow with ✓ badge on success, red glow with ✗ on failure, dim ⊘ for skipped. Per-step duration metrics stream into a resizable results tray.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Chain-to-Chain Composition</h3>
+            <p>Treat any saved workflow chain as a reusable building block. Drag chain nodes (rose-colored, link icon) from the Studio palette, embed them in larger pipelines, and execute recursively with depth limiting (max 5) and cycle detection. Composite templates like Master Audit and Daily Ops bundle three sub-chains in one click.</p>
           </article>
           <article class="card col-4">
             <h3>Auto-Assign and Optimize</h3>
-            <p>One-click pipeline negotiation assigns the best-scoring agent to each step by capability confidence. The optimizer detects data-flow dependencies and annotates steps with parallel execution groups.</p>
+            <p>One-click pipeline negotiation assigns the best-scoring agent to each step by capability confidence. The optimizer detects data-flow dependencies and annotates steps with parallel execution groups for concurrent execution.</p>
           </article>
           <article class="card col-4">
             <h3>Chain Versioning and Rollback</h3>
-            <p>Every workflow update snapshots the previous version. Roll back to any prior configuration, compare version history, and republish — all without leaving the Studio view.</p>
+            <p>Every workflow update snapshots the previous version. Roll back to any prior configuration, compare version history, and republish — all without leaving the Studio view. Rollback itself creates a new version, making it non-destructive.</p>
+          </article>
+          <article class="card col-4">
+            <h3>Pipeline Lane View</h3>
+            <p>Horizontal lanes per agent show every step assigned to that agent as a draggable badge. Move steps across lanes to reassign agents — the chain auto-saves and increments the version. Conflict resolution lets you pick a winner when capability scores tie.</p>
           </article>
         </div>
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Security Center</span></div>
+        <div class="section-head"><h2>Security Center</h2></div>
         <div class="card-grid">
           <article class="card col-6">
             <h3>Encrypted Secrets Vault</h3>
@@ -162,7 +213,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Agent Orchestration</span></div>
+        <div class="section-head"><h2>Agent Orchestration</h2></div>
         <div class="card-grid">
           <article class="card col-4">
             <h3>Five Orchestration Strategies</h3>
@@ -188,33 +239,41 @@
             <h3>Task Handoffs and Queues</h3>
             <p>Formal handoff lifecycle (REQUESTED → EXECUTING → COMPLETED/DECLINED) with preconditions and constraints. Priority-sorted task queue with auto-execution, batch drain, and broadcast timeout sweeper.</p>
           </article>
+          <article class="card col-12">
+            <h3>Agent Communication Graph</h3>
+            <p>The Communications Dashboard provides a read-only monitoring view of all inter-agent traffic across six channels — bus messages, point-to-point requests, broadcast queries, negotiations, handoffs, and collaboration sessions. A live SVG graph renders a circular layout of agent nodes with color-coded directed edges (cyan = requests, amber = negotiations, purple = handoffs, emerald = broadcasts) and edge labels showing message counts. A unified activity feed lists every event chronologically with type filters, and Threads view groups related messages by correlation_id into collapsible cards.</p>
+          </article>
         </div>
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>LLM and Tool Connectivity</span></div>
+        <div class="section-head"><h2>LLM and Tool Connectivity</h2></div>
         <div class="card-grid">
           <article class="card col-6">
             <h3>7 LLM Providers</h3>
             <p>Ollama (local), OpenAI, Google Gemini, Anthropic Claude, OpenRouter, LM Studio — each with provider-specific headers, split connect/read timeouts, and diagnostic error messages distinguishing connection refusal, timeout, and auth failure. Hot-reconfigure without restart.</p>
           </article>
           <article class="card col-6">
-            <h3>MCP Protocol Bridge</h3>
-            <p>Connect any Model Context Protocol server via JSON-RPC 2.0 stdio transport. Capabilities are translated to <code>mcp.&lt;server&gt;.&lt;tool&gt;</code>-namespaced entries in the tool registry, with MEDIUM-risk defaults and SQLite-backed server registry.</p>
+            <h3>Enhanced Neural Link</h3>
+            <p>Conversational command interface with streaming plan cards, RAG-augmented context (ChromaDB vector store), and natural-language delegation. Type intent like <code>delegate to security-auditor scan this project</code> and the planner routes to the right specialist agent. Plan cards expand inline with per-step approvals, tool outputs, and timing.</p>
+          </article>
+          <article class="card col-12">
+            <h3>MCP Integration — Client and Server</h3>
+            <p>MachinaOS operates in a dual MCP role. As a <strong>client</strong>, it consumes external Model Context Protocol servers via JSON-RPC 2.0 stdio or SSE transport — 5 default servers ship pre-configured (sequential-thinking, memory, fetch, github, sqlite), 3 auto-connect on startup, and a smart registration builder with 14 curated quick-pick packages auto-fills configuration as you type. Discovered tools are namespaced as <code>mcp.&lt;server&gt;.&lt;tool&gt;</code> and behave as first-class entries in the tool registry, usable from chat, Studio, and chains. As a <strong>server</strong>, MachinaOS exposes all 52 native tools, 4 virtual task tools, 17 resources across 7 domains, and 4 prompt templates to external MCP clients like Claude Desktop and Cursor over an SSE transport at <code>/mcp/serve/sse</code>.</p>
           </article>
           <article class="card col-6">
             <h3>GitHub Integration</h3>
             <p>Dedicated PAT-based GitHub connection panel, independent of the LLM provider. Validates against <code>api.github.com/user</code>, shows username and connection status dot in the system bar, and persists token in preferences.</p>
           </article>
           <article class="card col-6">
-            <h3>New Tool Registry (Sprint 58)</h3>
-            <p><code>filesystem.copy</code>, <code>filesystem.mkdir</code>, <code>git.tag</code>, <code>git.merge</code>, and <code>system.env</code> added — with workspace-bounded path safety, overwrite guards, and automatic sensitive-key redaction on env reads.</p>
+            <h3>40 Native Tools · 7 Domains</h3>
+            <p>filesystem (9), git (10), shell (2), process (4), browser (3), vscode (7), system (4) plus <code>filesystem.copy</code>, <code>filesystem.mkdir</code>, <code>git.tag</code>, <code>git.merge</code>, and <code>system.env</code> with workspace-bounded path safety, overwrite guards, and automatic sensitive-key redaction on env reads.</p>
           </article>
         </div>
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Template Library</span></div>
+        <div class="section-head"><h2>Template Library</h2></div>
         <div class="card-grid">
           <article class="card col-4">
             <h3>35 Chain Templates</h3>
@@ -232,7 +291,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Observability and CI/CD</span></div>
+        <div class="section-head"><h2>Observability and CI/CD</h2></div>
         <div class="card-grid">
           <article class="card col-6">
             <h3>Metrics Dashboard and Event Inspector</h3>
@@ -246,7 +305,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Execution Principles</span></div>
+        <div class="section-head"><h2>Execution Principles</h2></div>
         <div class="card-grid">
           <article class="card col-4">
             <h3>No Fake Magic</h3>
@@ -265,8 +324,45 @@
 
       <section class="cta reveal">
         <h3>Initialize protocol</h3>
-        <p class="lead">Use the demo guide to walk through setup and verify your first local orchestration flow.</p>
+        <p class="lead">Use the demo guide to walk through setup and verify your first local orchestration flow, or explore <a href="user-stories.html">real-world workflows</a> to see how engineering teams use MachinaOS in practice. The <a href="screens.html">interface gallery</a> shows every panel live.</p>
         <a class="btn btn-primary" href="demo-guide.html">Open Demo Guide</a>
+      </section>
+
+      <section class="section reveal" id="faq">
+        <div class="section-head"><h2>Frequently Asked Questions</h2></div>
+        <div class="card-grid">
+
+          <article class="card col-12">
+            <h3>What does "intent-native" mean?</h3>
+            <p>Intent-native means the system is designed from the ground up to accept natural-language goals and convert them into structured, validated plans — not just pass prompts to a model. MachinaOS has a dedicated planning layer that decomposes goals into steps, assigns tools, checks policies, and records outcomes as first-class runtime objects.</p>
+          </article>
+
+          <article class="card col-12">
+            <h3>How is MachinaOS different from LangChain, AutoGen, or CrewAI?</h3>
+            <p>LangChain, AutoGen, and CrewAI are frameworks and libraries — you build orchestration logic in code. MachinaOS is a runtime layer: it ships as a desktop application with a native UI, visual workflow studio, security center, and audit log. You interact with it through natural language or the visual canvas, not YAML files or Python glue code. It also runs fully locally with no cloud infrastructure dependency.</p>
+          </article>
+
+          <article class="card col-12">
+            <h3>Does MachinaOS run fully locally?</h3>
+            <p>Yes. The runtime, planner, tool registry, memory system, secrets vault, and audit log all run on your local machine. You can use Ollama as a fully local LLM provider with zero network calls. Cloud LLM providers (OpenAI, Gemini, Claude, OpenRouter, LM Studio) are opt-in — the system does not require any cloud infrastructure to operate.</p>
+          </article>
+
+          <article class="card col-12">
+            <h3>Which LLM providers does MachinaOS support?</h3>
+            <p>MachinaOS supports seven LLM providers: Ollama (fully local), OpenAI, Google Gemini, Anthropic Claude, OpenRouter, LM Studio, and a configurable custom endpoint. You can hot-reconfigure the active provider from the Settings panel without restarting the runtime.</p>
+          </article>
+
+          <article class="card col-12">
+            <h3>What is the policy gate and approval system?</h3>
+            <p>The policy gate evaluates every proposed step against a risk profile before execution. Destructive operations (file deletion, remote calls, high-impact system actions) trigger an approval requirement — the runtime pauses and presents the plan for human review. You can approve, deny, modify, or request an explanation for any step. Approval decisions are recorded in the immutable audit log.</p>
+          </article>
+
+          <article class="card col-12">
+            <h3>Is MachinaOS open source?</h3>
+            <p>MachinaOS is currently in pre-release. The core architecture, desktop application, and runtime are under active development. Licensing and open-source plans will be announced with the v1.0 public launch. Sign up on the contact page to be notified.</p>
+          </article>
+
+        </div>
       </section>
     </main>
 

@@ -18,6 +18,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="About MachinaOS | Architecture and Roadmap" />
     <meta name="twitter:description" content="Architecture, roadmap, and engineering principles behind local-first AI execution." />
+    <meta property="og:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MachinaOS — Local-First Intent Runtime for governed AI agent orchestration" />
+    <meta name="twitter:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
     <link rel="canonical" href="https://machinaos.ai/about.html" />
     <script type="application/ld+json">
     {
@@ -27,6 +32,24 @@
         {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://machinaos.ai/"},
         {"@type": "ListItem", "position": 2, "name": "About", "item": "https://machinaos.ai/about.html"}
       ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "name": "About MachinaOS",
+      "url": "https://machinaos.ai/about.html",
+      "mainEntity": {
+        "@type": "Organization",
+        "@id": "https://machinaos.ai/#organization",
+        "founder": {
+          "@type": "Person",
+          "name": "Davide",
+          "jobTitle": "Founder",
+          "worksFor": { "@id": "https://machinaos.ai/#organization" }
+        }
+      }
     }
     </script>
     <link rel="stylesheet" href="assets/styles.css?v=2" />
@@ -73,7 +96,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>The Mission</span></div>
+        <div class="section-head"><h2>The Mission</h2></div>
         <div class="card">
           <h3>Synchronize intent and execution</h3>
           <p>
@@ -84,7 +107,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Development Stages</span></div>
+        <div class="section-head"><h2>Development Stages</h2></div>
         <div class="card-grid">
           <article class="card col-4">
             <h3>Stage 1: Machina Core ✓</h3>
@@ -102,7 +125,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Engineering Principles</span></div>
+        <div class="section-head"><h2>Engineering Principles</h2></div>
         <div class="card-grid">
           <article class="card col-6">
             <h3>Explicit tool boundaries</h3>
@@ -127,6 +150,33 @@
           <article class="card col-6">
             <h3>Local-first by default</h3>
             <p>Plans, secrets, logs, agent definitions, and workflow chains all live on your machine. Cloud services are opt-in LLM providers, not infrastructure dependencies.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><h2>Origin Story</h2></div>
+        <div class="card">
+          <h3>Built from a real engineering problem</h3>
+          <p>MachinaOS started from a simple frustration: AI assistants that could talk about what they would do, but not actually do it in a governed, auditable way. Every early AI agent framework required writing orchestration glue code, managing prompt chains in Python, and accepting that the "execution" was largely model-generated text rather than real tool calls with real outputs.</p>
+          <p>The goal was a runtime layer — something that sat above the OS and treated intent, plans, approvals, and tool execution as first-class objects, with a native desktop shell and a human in the loop by design. After 60 sprints and 2,148 passing tests, that runtime exists. MachinaOS is the result.</p>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><h2>Roadmap</h2></div>
+        <div class="card-grid">
+          <article class="card col-4">
+            <h3>v0.2 — Current</h3>
+            <p>Full desktop application with 16 integrated views, Visual Workflow Studio, Security Center, 7 LLM providers, MCP Protocol Bridge, GitHub integration, and 35+ workflow templates.</p>
+          </article>
+          <article class="card col-4">
+            <h3>v0.3 — OS Layer</h3>
+            <p>Background services, persistent policy engine running independently of the UI, semantic file system features, and shared agent mesh for small team deployments.</p>
+          </article>
+          <article class="card col-4">
+            <h3>v1.0 — Public Launch</h3>
+            <p>Production-grade release with verified external integrations, published pricing, open-source components, and official documentation. Sign up via the <a href="contact.html">contact page</a> to be notified.</p>
           </article>
         </div>
       </section>

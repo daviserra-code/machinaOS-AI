@@ -278,11 +278,15 @@ h1 strong {
   background: var(--accent);
 }
 
-.section-head span {
+.section-head span,
+.section-head h2 {
   font-size: 0.62rem;
   letter-spacing: 0.17em;
   text-transform: uppercase;
   color: var(--accent);
+  font-weight: inherit;
+  margin: 0;
+  padding: 0;
 }
 
 .card-grid {

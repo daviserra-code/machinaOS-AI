@@ -18,6 +18,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="MachinaOS | Local-First AI Orchestration" />
     <meta name="twitter:description" content="Intent-native runtime for governed AI agent workflows." />
+    <meta property="og:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MachinaOS — Local-First Intent Runtime for governed AI agent orchestration" />
+    <meta name="twitter:image" content="https://machinaos.ai/assets/og/og-default.jpg" />
     <link rel="canonical" href="https://machinaos.ai/" />
     <script type="application/ld+json">
     {
@@ -45,6 +50,7 @@
       "@type": "SoftwareApplication",
       "@id": "https://machinaos.ai/#software",
       "name": "MachinaOS",
+      "image": "https://machinaos.ai/assets/og/og-default.jpg",
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Linux, macOS, Windows",
       "description": "Intent-native AI orchestration layer for local-first, governed multi-agent workflows with visual pipeline studio, security center, and 7 LLM provider support",
@@ -52,30 +58,46 @@
       "softwareVersion": "0.2",
       "featureList": "https://machinaos.ai/features.html",
       "screenshot": "https://machinaos.ai/screens.html",
-      "offers": [
-        {
-          "@type": "Offer",
-          "name": "Free",
-          "price": "0",
-          "priceCurrency": "USD",
-          "availability": "https://schema.org/PreOrder",
-          "description": "Single local runtime, core tool registry, session memory, demo mode"
-        },
-        {
-          "@type": "Offer",
-          "name": "Intelligence",
-          "price": "49",
-          "priceCurrency": "USD",
-          "availability": "https://schema.org/PreOrder",
-          "description": "Multi-agent delegation, consensus flows, Visual Workflow Studio, Security Center, MCP protocol, 7 LLM providers, native desktop app"
-        },
-        {
-          "@type": "Offer",
-          "name": "Enterprise",
-          "availability": "https://schema.org/PreOrder",
-          "description": "Distributed agent mesh, security policy templates, org-wide observability, CI/CD integration"
-        }
-      ],
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "USD",
+        "lowPrice": "0",
+        "highPrice": "49",
+        "offerCount": "3",
+        "availability": "https://schema.org/PreOrder",
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Free",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/PreOrder",
+            "description": "Single local runtime, core tool registry, session memory, demo mode"
+          },
+          {
+            "@type": "Offer",
+            "name": "Intelligence",
+            "price": "49",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/PreOrder",
+            "description": "Multi-agent delegation, consensus flows, Visual Workflow Studio, Security Center, MCP protocol, 7 LLM providers, native desktop app"
+          },
+          {
+            "@type": "Offer",
+            "name": "Enterprise",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/PreOrder",
+            "priceSpecification": {
+              "@type": "PriceSpecification",
+              "price": "0",
+              "priceCurrency": "USD",
+              "valueAddedTaxIncluded": false
+            },
+            "description": "Distributed agent mesh, security policy templates, org-wide observability, CI/CD integration — contact sales for pricing"
+          }
+        ]
+      },
       "publisher": {"@id": "https://machinaos.ai/#organization"}
     }
     </script>
@@ -146,7 +168,38 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>Core Modules</span></div>
+        <div class="section-head"><h2>What's New in v0.2</h2></div>
+        <p class="lead">The May 2026 release introduces six headline capabilities — a visual pipeline editor with a step-by-step debugger, chain composition, an inter-agent communication graph, full MCP integration as both client and server, and a dramatically enhanced Neural Link.</p>
+        <div class="card-grid">
+          <article class="card col-6">
+            <h3>Visual Workflow Studio</h3>
+            <p>SVG canvas with drag-and-drop palette, smart argument builder for 30+ tools, zoom and pan, auto-assign, optimize, and one-click load of any of 35 chain templates. Build multi-agent pipelines without writing code.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Studio Debugger</h3>
+            <p>Server-side debug sessions with Step Over, Continue, and Stop. Each canvas node animates in real time — amber pulse for running, green ✓ for success, red ✗ for failure — with per-step duration metrics in a resizable results tray.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Chain-to-Chain Composition</h3>
+            <p>Treat any saved workflow chain as a reusable building block. Drag chain nodes from the Studio palette, embed them in larger pipelines, and execute recursively with depth limiting and cycle detection.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Agent Communication Graph</h3>
+            <p>Live SVG visualization of inter-agent traffic across six communication channels — requests, negotiations, handoffs, broadcasts, consensus, and collaborations — with a unified activity feed and message threading.</p>
+          </article>
+          <article class="card col-6">
+            <h3>MCP Integration</h3>
+            <p>Full Model Context Protocol support in both directions: consume external MCP servers (sequential-thinking, memory, fetch, GitHub, SQLite) and expose all 52 native tools, 17 resources, and 4 prompt templates to Claude Desktop, Cursor, and other MCP clients.</p>
+          </article>
+          <article class="card col-6">
+            <h3>Enhanced Neural Link</h3>
+            <p>Conversational command interface with streaming plan cards, RAG-augmented context, and natural-language delegation. Type your intent, watch the plan form, approve risky steps, and inspect every tool result.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <div class="section-head"><h2>Core Architecture</h2></div>
         <div class="card-grid">
           <article class="card col-4">
             <h3>Heuristic Intent Router</h3>
@@ -165,22 +218,18 @@
             <p>Session, preference, and per-agent memory keep context stable. AES-256-GCM encrypted secrets vault keeps credentials off disk in plain text.</p>
           </article>
           <article class="card col-4">
-            <h3>Visual Workflow Studio</h3>
-            <p>Drag-and-drop canvas to build, connect, and execute multi-agent pipelines visually — with live debug execution and per-node status overlays.</p>
-          </article>
-          <article class="card col-4">
             <h3>Security Center</h3>
             <p>Built-in vulnerability scanner, SOC 2-style immutable audit log with hash chains, credential scrubber, and secrets vault in one panel.</p>
           </article>
           <article class="card col-4">
-            <h3>MCP Protocol Bridge</h3>
-            <p>Connect any Model Context Protocol server via JSON-RPC 2.0 stdio transport, auto-registering its tools into the execution registry.</p>
+            <h3>Local-First Runtime</h3>
+            <p>Planner, tool registry, memory, secrets vault, and audit log all run on your machine. Use Ollama for fully local LLM inference, or opt into cloud providers per workspace.</p>
           </article>
         </div>
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>What It Does</span></div>
+        <div class="section-head"><h2>What It Does</h2></div>
         <h2>From intent to governed execution</h2>
         <p class="lead">Machina turns a goal into a structured plan, runs it with real tools, and shows every step — approvals, events, and runtime state included.</p>
         <div class="card-grid">
@@ -212,7 +261,7 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>How It Works</span></div>
+        <div class="section-head"><h2>How It Works</h2></div>
         <div class="card-grid">
           <article class="card col-4">
             <h3>1 — Understand intent</h3>
@@ -230,23 +279,31 @@
       </section>
 
       <section class="section reveal">
-        <div class="section-head"><span>System Snapshot</span></div>
+        <div class="section-head"><h2>System Snapshot</h2></div>
         <div class="stat-row">
           <div class="stat">
-            <strong>2,148 Tests</strong>
-            <span>Verified across 60 completed sprints</span>
+            <strong>1,964 Tests</strong>
+            <span>Verified across 64 sprints (v0.2.0)</span>
+          </div>
+          <div class="stat">
+            <strong>40 Tools · 14 Views</strong>
+            <span>7 tool domains, full desktop UI</span>
           </div>
           <div class="stat">
             <strong>7 LLM Providers</strong>
             <span>Ollama, OpenAI, Gemini, Claude, OpenRouter, LM Studio</span>
           </div>
           <div class="stat">
-            <strong>Local-First</strong>
-            <span>Plans, secrets, logs, and agents on your machine</span>
+            <strong>MCP Client + Server</strong>
+            <span>Consume and expose Model Context Protocol</span>
           </div>
           <div class="stat">
-            <strong>35+ Templates</strong>
-            <span>Chain, agent, and workflow DSL blueprints</span>
+            <strong>35 Chain Templates</strong>
+            <span>Plus 21 agent and 24 workflow DSL blueprints</span>
+          </div>
+          <div class="stat">
+            <strong>Local-First</strong>
+            <span>Plans, secrets, logs, and agents on your machine</span>
           </div>
         </div>
       </section>
