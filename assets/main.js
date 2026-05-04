@@ -162,7 +162,7 @@ function initDemoDialog() {
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", (event) => {
       event.preventDefault();
-      window.open("https://demo.machinaos.ai/demo/start", "_blank", "noopener,noreferrer");
+      window.open("https://demo.machinaos.ai/", "_blank", "noopener,noreferrer");
     });
   });
 }
